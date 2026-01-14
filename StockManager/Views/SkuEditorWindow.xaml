@@ -1,0 +1,131 @@
+﻿<Window x:Class="StockManager.Views.SkuEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding Title}"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        MinWidth="560">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Title -->
+            <RowDefinition Height="Auto"/>
+            <!-- Name -->
+            <RowDefinition Height="Auto"/>
+            <!-- Category -->
+            <RowDefinition Height="Auto"/>
+            <!-- Phone model -->
+            <RowDefinition Height="Auto"/>
+            <!-- Case type -->
+            <RowDefinition Height="Auto"/>
+            <!-- Protector type -->
+            <RowDefinition Height="Auto"/>
+            <!-- Cost/Price/Active -->
+            <RowDefinition Height="Auto"/>
+            <!-- Error -->
+            <RowDefinition Height="Auto"/>
+            <!-- Buttons -->
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{Binding Title}"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,12"/>
+
+        <!-- Nombre -->
+        <Grid Grid.Row="1" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Nombre" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="1" Width="360" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+        </Grid>
+
+        <!-- Categoría -->
+        <Grid Grid.Row="2" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Categoría" VerticalAlignment="Center"/>
+            <ComboBox Grid.Column="1"
+                      Width="240"
+                      ItemsSource="{Binding CategoryOptions}"
+                      SelectedItem="{Binding Category}"/>
+        </Grid>
+
+        <!-- Modelo -->
+        <Grid Grid.Row="3" Margin="0,0,0,8" Opacity="{Binding IsPhoneModelEnabled, Converter={StaticResource BooleanToOpacityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Modelo" VerticalAlignment="Center"/>
+            <ComboBox Grid.Column="1"
+                      Width="240"
+                      IsEnabled="{Binding IsPhoneModelEnabled}"
+                      ItemsSource="{Binding PhoneModelOptions}"
+                      DisplayMemberPath="Display"
+                      SelectedValuePath="Id"
+                      SelectedValue="{Binding PhoneModelId}"/>
+        </Grid>
+
+        <!-- Tipo funda -->
+        <Grid Grid.Row="4" Margin="0,0,0,8" Opacity="{Binding IsCaseTypeEnabled, Converter={StaticResource BooleanToOpacityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Tipo funda" VerticalAlignment="Center"/>
+            <ComboBox Grid.Column="1"
+                      Width="240"
+                      IsEnabled="{Binding IsCaseTypeEnabled}"
+                      ItemsSource="{Binding CaseTypeOptions}"
+                      SelectedItem="{Binding CaseType}"/>
+        </Grid>
+
+        <!-- Tipo templado -->
+        <Grid Grid.Row="5" Margin="0,0,0,8" Opacity="{Binding IsProtectorTypeEnabled, Converter={StaticResource BooleanToOpacityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Tipo templado" VerticalAlignment="Center"/>
+            <ComboBox Grid.Column="1"
+                      Width="240"
+                      IsEnabled="{Binding IsProtectorTypeEnabled}"
+                      ItemsSource="{Binding ProtectorTypeOptions}"
+                      SelectedItem="{Binding ProtectorType}"/>
+        </Grid>
+
+        <!-- Costo / Precio / Activo -->
+        <Grid Grid.Row="6" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Costo / Precio" VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <TextBox Width="120" Margin="0,0,8,0" Text="{Binding CostText, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Width="120" Margin="0,0,12,0" Text="{Binding PriceText, UpdateSourceTrigger=PropertyChanged}"/>
+                <CheckBox Content="Activo" IsChecked="{Binding Active}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Error -->
+        <TextBlock Grid.Row="7"
+                   Text="{Binding ErrorMessage}"
+                   Foreground="DarkRed"
+                   Margin="0,8,0,0"/>
+
+        <!-- Botones -->
+        <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="Cancelar" Width="90" Margin="0,0,8,0" Click="Cancel_Click"/>
+            <Button Content="Guardar" Width="90" Click="Save_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

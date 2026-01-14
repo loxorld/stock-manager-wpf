@@ -1,0 +1,97 @@
+﻿<Window x:Class="StockManager.Views.RegisterMovementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Registrar movimiento"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        MinWidth="420">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Título -->
+            <RowDefinition Height="Auto"/>
+            <!-- Tipo -->
+            <RowDefinition Height="Auto"/>
+            <!-- Cantidad -->
+            <RowDefinition Height="Auto"/>
+            <!-- Nota -->
+            <RowDefinition Height="Auto"/>
+            <!-- Error -->
+            <RowDefinition Height="Auto"/>
+            <!-- Botones -->
+        </Grid.RowDefinitions>
+
+        <!-- Título -->
+        <TextBlock Grid.Row="0"
+                   Text="{Binding SkuName}"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,12"/>
+
+        <!-- Tipo -->
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Tipo"
+                       VerticalAlignment="Center"/>
+
+            <ComboBox Grid.Column="1"
+                      x:Name="TypeCombo"
+                      Width="260"
+                      SelectedItem="{Binding Type}" />
+        </Grid>
+
+        <!-- Cantidad -->
+        <Grid Grid.Row="2" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Cantidad"
+                       VerticalAlignment="Center"/>
+
+            <TextBox Grid.Column="1"
+                     Width="120"
+                     VerticalContentAlignment="Center"
+                     Text="{Binding QuantityText, UpdateSourceTrigger=PropertyChanged}"
+ />
+        </Grid>
+
+        <!-- Nota -->
+        <StackPanel Grid.Row="3" Margin="0,0,0,10">
+            <TextBlock Text="Nota (opcional)" Margin="0,0,0,4"/>
+            <TextBox Width="360"
+                     Height="70"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+
+        <!-- Error -->
+        <TextBlock Grid.Row="4"
+                   Text="{Binding ErrorMessage}"
+                   Foreground="DarkRed"
+                   Margin="0,0,0,10"/>
+
+        <!-- Botones -->
+        <StackPanel Grid.Row="5"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Content="Cancelar"
+                    Width="90"
+                    Margin="0,0,8,0"
+                    Click="Cancel_Click"/>
+
+            <Button Content="Guardar"
+                    Width="90"
+                    Click="Save_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
+
