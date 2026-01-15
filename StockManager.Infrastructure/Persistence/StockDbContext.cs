@@ -6,7 +6,7 @@ namespace StockManager.Infrastructure.Persistence;
 
 public class StockDbContext : DbContext
 {
-    public DbSet<PhoneModel> PhoneModels => Set<PhoneModel>();
+    
     public DbSet<Sku> Skus => Set<Sku>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
 
@@ -16,20 +16,7 @@ public class StockDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // PhoneModel
-        modelBuilder.Entity<PhoneModel>(e =>
-        {
-            e.ToTable("phone_models");
-            e.HasKey(x => x.Id);
-
-            e.Property(x => x.Brand).IsRequired().HasMaxLength(80);
-            e.Property(x => x.ModelName).IsRequired().HasMaxLength(80);
-
-            // ✅ Active
-            e.Property(x => x.Active).IsRequired();
-
-            e.HasIndex(x => new { x.Brand, x.ModelName }).IsUnique();
-        });
+        
 
         // Sku
         modelBuilder.Entity<Sku>(e =>
@@ -42,17 +29,11 @@ public class StockDbContext : DbContext
             e.Property(x => x.Cost).HasColumnType("decimal(12,2)");
             e.Property(x => x.Price).HasColumnType("decimal(12,2)");
 
-            e.HasOne(x => x.PhoneModel)
-             .WithMany()
-             .HasForeignKey(x => x.PhoneModelId)
-             .OnDelete(DeleteBehavior.Restrict);
+            
         });
 
         // Seed inicial
-        modelBuilder.Entity<PhoneModel>().HasData(
-            new PhoneModel { Id = 1, Brand = "Samsung", ModelName = "A02", Active = true },
-            new PhoneModel { Id = 2, Brand = "Samsung", ModelName = "A20", Active = true }
-        );
+        
 
         modelBuilder.Entity<Sku>().HasData(
             new Sku
@@ -60,7 +41,7 @@ public class StockDbContext : DbContext
                 Id = 1,
                 Category = ProductCategory.Case,
                 Name = "Funda silicona Samsung A02",
-                PhoneModelId = 1,
+                
                 CaseType = CaseType.Silicone,
                 ProtectorType = null,
                 Stock = 10,
@@ -73,7 +54,7 @@ public class StockDbContext : DbContext
                 Id = 2,
                 Category = ProductCategory.Case,
                 Name = "Funda transparente Samsung A20",
-                PhoneModelId = 2,
+                
                 CaseType = CaseType.Transparent,
                 ProtectorType = null,
                 Stock = 7,
@@ -86,7 +67,7 @@ public class StockDbContext : DbContext
                 Id = 3,
                 Category = ProductCategory.ScreenProtector,
                 Name = "Templado reforzado Samsung A02",
-                PhoneModelId = 1,
+               
                 CaseType = null,
                 ProtectorType = ProtectorType.Reinforced,
                 Stock = 12,
@@ -99,7 +80,7 @@ public class StockDbContext : DbContext
                 Id = 4,
                 Category = ProductCategory.ScreenProtector,
                 Name = "Templado anti-espía Samsung A20",
-                PhoneModelId = 2,
+                
                 CaseType = null,
                 ProtectorType = ProtectorType.Privacy,
                 Stock = 5,
@@ -112,7 +93,7 @@ public class StockDbContext : DbContext
                 Id = 5,
                 Category = ProductCategory.Accessory,
                 Name = "Cargador 20W USB-C",
-                PhoneModelId = null,
+                
                 CaseType = null,
                 ProtectorType = null,
                 Stock = 6,
@@ -132,10 +113,11 @@ public class StockDbContext : DbContext
             e.HasOne(x => x.Sku)
              .WithMany()
              .HasForeignKey(x => x.SkuId)
-             .OnDelete(DeleteBehavior.Restrict);
+             .OnDelete(DeleteBehavior.Cascade); // ✅ antes estaba Restrict
 
             e.HasIndex(x => x.SkuId);
             e.HasIndex(x => x.CreatedAt);
         });
+
     }
 }

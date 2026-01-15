@@ -14,9 +14,7 @@ public class Sku
     // Nombre visible tipo: "Funda silicona A02" / "Templado Privacy A20" / "Cargador 20W"
     public string Name { get; set; } = "";
 
-    // Para fundas y templados
-    public int? PhoneModelId { get; set; }
-    public PhoneModel? PhoneModel { get; set; }
+    
 
     // Solo si Category = Case
     public CaseType? CaseType { get; set; }

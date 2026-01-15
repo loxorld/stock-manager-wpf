@@ -27,10 +27,9 @@ public partial class App : System.Windows.Application
                 // Services
                 services.AddTransient<ISkuQueryService, SkuQueryService>();
                 services.AddTransient<ISkuCommandService, SkuCommandService>();
-                services.AddTransient<IPhoneModelQueryService, PhoneModelQueryService>();
+                
                 services.AddTransient<IStockMovementService, StockMovementService>();
                 services.AddTransient<IStockMovementQueryService, StockMovementQueryService>();
-                services.AddTransient<StockManager.Application.Services.IPhoneModelCommandService, StockManager.Infrastructure.Services.PhoneModelCommandService>();
                 services.AddTransient<StockManager.Application.Services.IDashboardQueryService, StockManager.Infrastructure.Services.DashboardQueryService>();
                 services.AddTransient<StockManager.ViewModels.DashboardViewModel>();
                 services.AddTransient<StockManager.Views.DashboardWindow>();

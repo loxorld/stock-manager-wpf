@@ -64,14 +64,7 @@
                 <ColumnDefinition Width="140"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Text="Modelo" VerticalAlignment="Center"/>
-            <ComboBox Grid.Column="1"
-                      Width="240"
-                      IsEnabled="{Binding IsPhoneModelEnabled}"
-                      ItemsSource="{Binding PhoneModelOptions}"
-                      DisplayMemberPath="Display"
-                      SelectedValuePath="Id"
-                      SelectedValue="{Binding PhoneModelId}"/>
+            
         </Grid>
 
         <!-- Tipo funda -->

@@ -164,7 +164,7 @@ public partial class StockViewModel : ObservableObject
             // Datos visibles del listado
             DetailTitle = SelectedItem.Name;
             DetailCategory = SelectedItem.Category;
-            DetailPhoneModel = string.IsNullOrWhiteSpace(SelectedItem.PhoneModel) ? "-" : SelectedItem.PhoneModel;
+            
             DetailStock = SelectedItem.Stock;
             DetailPrice = SelectedItem.Price;
 

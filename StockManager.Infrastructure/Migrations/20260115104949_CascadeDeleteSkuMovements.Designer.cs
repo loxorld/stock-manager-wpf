@@ -11,57 +11,14 @@ using StockManager.Infrastructure.Persistence;
 namespace StockManager.Infrastructure.Migrations
 {
     [DbContext(typeof(StockDbContext))]
-    [Migration("20260115085326_PhoneModel_SearchInsensitive")]
-    partial class PhoneModel_SearchInsensitive
+    [Migration("20260115104949_CascadeDeleteSkuMovements")]
+    partial class CascadeDeleteSkuMovements
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
-
-            modelBuilder.Entity("StockManager.Domain.Entities.PhoneModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Brand")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ModelName")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Brand", "ModelName")
-                        .IsUnique();
-
-                    b.ToTable("phone_models", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Active = true,
-                            Brand = "Samsung",
-                            ModelName = "A02"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Active = true,
-                            Brand = "Samsung",
-                            ModelName = "A20"
-                        });
-                });
 
             modelBuilder.Entity("StockManager.Domain.Entities.Sku", b =>
                 {
@@ -86,9 +43,6 @@ namespace StockManager.Infrastructure.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("PhoneModelId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(12,2)");
 
@@ -99,8 +53,6 @@ namespace StockManager.Infrastructure.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PhoneModelId");
 
                     b.ToTable("skus", (string)null);
 
@@ -113,7 +65,6 @@ namespace StockManager.Infrastructure.Migrations
                             Category = 1,
                             Cost = 1500m,
                             Name = "Funda silicona Samsung A02",
-                            PhoneModelId = 1,
                             Price = 3000m,
                             Stock = 10
                         },
@@ -125,7 +76,6 @@ namespace StockManager.Infrastructure.Migrations
                             Category = 1,
                             Cost = 1400m,
                             Name = "Funda transparente Samsung A20",
-                            PhoneModelId = 2,
                             Price = 2800m,
                             Stock = 7
                         },
@@ -136,7 +86,6 @@ namespace StockManager.Infrastructure.Migrations
                             Category = 2,
                             Cost = 1200m,
                             Name = "Templado reforzado Samsung A02",
-                            PhoneModelId = 1,
                             Price = 2500m,
                             ProtectorType = 2,
                             Stock = 12
@@ -148,7 +97,6 @@ namespace StockManager.Infrastructure.Migrations
                             Category = 2,
                             Cost = 1800m,
                             Name = "Templado anti-espía Samsung A20",
-                            PhoneModelId = 2,
                             Price = 3500m,
                             ProtectorType = 3,
                             Stock = 5
@@ -202,22 +150,12 @@ namespace StockManager.Infrastructure.Migrations
                     b.ToTable("stock_movements", (string)null);
                 });
 
-            modelBuilder.Entity("StockManager.Domain.Entities.Sku", b =>
-                {
-                    b.HasOne("StockManager.Domain.Entities.PhoneModel", "PhoneModel")
-                        .WithMany()
-                        .HasForeignKey("PhoneModelId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("PhoneModel");
-                });
-
             modelBuilder.Entity("StockManager.Domain.Entities.StockMovement", b =>
                 {
                     b.HasOne("StockManager.Domain.Entities.Sku", "Sku")
                         .WithMany()
                         .HasForeignKey("SkuId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Sku");

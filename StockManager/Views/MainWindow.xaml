@@ -6,8 +6,7 @@
         Title="Stock Manager"
         Height="540" Width="1040"
         WindowStartupLocation="CenterScreen"
-        FontSize="13"
-        xmlns:materialDesignThemes="http://materialdesigninxaml.net/winfx/xaml/themes">
+        FontSize="13">
 
     <!-- Atajos -->
     <Window.InputBindings>
@@ -41,15 +40,6 @@
                      BorderThickness="0"
                      Padding="0"
                      Margin="0">
-                <Button Click="PhoneModels_Click"
-                        ToolTip="Modelos de celular"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Margin="0,0,8,0">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="CellphoneCog" Width="18" Height="18" Margin="0,0,8,0"/>
-                        <TextBlock Text="Modelos"/>
-                    </StackPanel>
-                </Button>
 
                 <Button Click="Dashboard_Click"
                         ToolTip="Dashboard"
@@ -63,7 +53,6 @@
 
                 <Separator Width="12" Opacity="0"/>
 
-                <!-- FIX: Cambiar a MaterialDesignRaisedButton para evitar XDG0010 -->
                 <Button Click="NewSku_Click"
                         ToolTip="Nuevo SKU (Ctrl+N)"
                         Style="{StaticResource MaterialDesignRaisedButton}"
@@ -81,6 +70,31 @@
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Pencil" Width="18" Height="18" Margin="0,0,8,0"/>
                         <TextBlock Text="Editar"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Eliminar SKU (prolijo, rojo, y deshabilitado sin selección) -->
+                <Button Click="DeleteSku_Click"
+                        ToolTip="Eliminar SKU seleccionado"
+                        Margin="0,0,8,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedItem}" Value="{x:Null}">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                    <Setter Property="Opacity" Value="0.6"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="DeleteOutline"
+                                                 Width="18" Height="18"
+                                                 Margin="0,0,8,0"
+                                                 Foreground="#C62828"/>
+                        <TextBlock Text="Eliminar SKU" Foreground="#C62828"/>
                     </StackPanel>
                 </Button>
 
@@ -104,19 +118,7 @@
                         <TextBlock Text="Historial"/>
                     </StackPanel>
                 </Button>
-                <Button Margin="0,8,0,0"
-        Click="DeleteSku_Click"
-        Style="{StaticResource MaterialDesignOutlinedButton}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="DeleteOutline"
-                                 Width="18"
-                                 Height="18"
-                                 Margin="0,0,8,0"
-                                 Foreground="#C62828"/>
-                        <TextBlock Text="Eliminar SKU"
-                   Foreground="#C62828"/>
-                    </StackPanel>
-                </Button>
+
             </ToolBar>
         </DockPanel>
 
@@ -141,7 +143,7 @@
                               VerticalAlignment="Center"
                               IsChecked="{Binding StockLowOnly}"/>
 
-                    <TextBox Width="80" Margin="0,0,0,0"
+                    <TextBox Width="80"
                              VerticalContentAlignment="Center"
                              Text="{Binding StockLowThreshold, UpdateSourceTrigger=PropertyChanged}"
                              materialDesign:HintAssist.Hint="≤ umbral"/>
@@ -152,9 +154,9 @@
                     <TextBox Width="340" Margin="0,0,10,0"
                              VerticalContentAlignment="Center"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             materialDesign:HintAssist.Hint="Buscar por nombre / modelo..."
+                             materialDesign:HintAssist.Hint="Buscar por nombre..."
                              materialDesign:TextFieldAssist.PrefixText=""/>
-                    <!-- FIX: Cambiar a MaterialDesignRaisedButton para evitar XDG0010 -->
+
                     <Button Width="110"
                             Command="{Binding SearchCommand}"
                             Style="{StaticResource MaterialDesignRaisedButton}">
@@ -219,7 +221,6 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="3*"/>
                             <DataGridTextColumn Header="Categoría" Binding="{Binding Category}" Width="1.1*"/>
-                            <DataGridTextColumn Header="Modelo" Binding="{Binding PhoneModel}" Width="1.4*"/>
                             <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="0.7*"/>
                             <DataGridTextColumn Header="Precio" Binding="{Binding Price, StringFormat={}{0:C}}" Width="0.9*"/>
                         </DataGrid.Columns>
@@ -267,7 +268,6 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120"/>
@@ -277,23 +277,20 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Categoría" Opacity="0.7"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DetailCategory}"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Modelo" Opacity="0.7"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DetailPhoneModel}" TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Estado" Opacity="0.7"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DetailActive}"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Estado" Opacity="0.7"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DetailActive}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Stock" Opacity="0.7"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DetailStock}"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Stock" Opacity="0.7"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DetailStock}"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Precio" Opacity="0.7"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DetailPrice, StringFormat={}{0:C}}"/>
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Precio" Opacity="0.7"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DetailPrice, StringFormat={}{0:C}}"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Costo" Opacity="0.7"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DetailCost, StringFormat={}{0:C}}"/>
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Costo" Opacity="0.7"/>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding DetailCost, StringFormat={}{0:C}}"/>
-
-                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Margen" Opacity="0.7"/>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DetailMargin, StringFormat={}{0:C}}"/>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Margen" Opacity="0.7"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding DetailMargin, StringFormat={}{0:C}}"/>
                     </Grid>
 
                     <StackPanel Grid.Row="2" Margin="0,0,0,12">
@@ -316,9 +313,7 @@
                                     <TextBlock Text="+1 compra"/>
                                 </StackPanel>
                             </Button>
-                               
-                            
-                            
+
                             <Button Width="150"
                                     Command="{Binding QuickSaleCommand}"
                                     Style="{StaticResource MaterialDesignOutlinedButton}">
@@ -327,11 +322,8 @@
                                     <TextBlock Text="-1 venta"/>
                                 </StackPanel>
                             </Button>
-                            
-                            
                         </StackPanel>
 
-                        <!-- FIX: Cambiar a MaterialDesignRaisedButton para evitar XDG0010 -->
                         <Button Margin="0,0,0,8"
                                 Click="RegisterMovement_Click"
                                 Style="{StaticResource MaterialDesignRaisedButton}">

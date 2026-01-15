@@ -12,7 +12,7 @@ public class UpsertSkuRequest
     public string Name { get; set; } = "";
     public ProductCategory Category { get; set; }
 
-    public int? PhoneModelId { get; set; }
+    
 
     public CaseType? CaseType { get; set; }
     public ProtectorType? ProtectorType { get; set; }

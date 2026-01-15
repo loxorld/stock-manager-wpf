@@ -12,11 +12,11 @@ public partial class SkuEditorViewModel : ObservableObject
 {
     private readonly ISkuQueryService _skuQuery;
     private readonly ISkuCommandService _skuCommand;
-    private readonly IPhoneModelQueryService _phoneModels;
+    
 
     public int? Id { get; }
 
-    public ObservableCollection<PhoneModelDto> PhoneModelOptions { get; } = new();
+    
 
     // ✅ Listas para combos (enums)
     public IReadOnlyList<ProductCategory> CategoryOptions { get; } =
@@ -79,12 +79,11 @@ public partial class SkuEditorViewModel : ObservableObject
     public SkuEditorViewModel(
         ISkuQueryService skuQuery,
         ISkuCommandService skuCommand,
-        IPhoneModelQueryService phoneModels,
         int? id = null)
     {
         _skuQuery = skuQuery;
         _skuCommand = skuCommand;
-        _phoneModels = phoneModels;
+        
         Id = id;
         Title = id is null ? "Nuevo SKU" : "Editar SKU";
     }
@@ -93,9 +92,7 @@ public partial class SkuEditorViewModel : ObservableObject
     {
         ErrorMessage = null;
 
-        PhoneModelOptions.Clear();
-        var models = await _phoneModels.GetAllAsync();
-        foreach (var m in models) PhoneModelOptions.Add(m);
+        
 
         if (Id is null) return;
 
@@ -108,7 +105,7 @@ public partial class SkuEditorViewModel : ObservableObject
 
         Name = sku.Name;
         Category = sku.Category;
-        PhoneModelId = sku.PhoneModelId;
+        
         CaseType = sku.CaseType;
         ProtectorType = sku.ProtectorType;
         CostText = sku.Cost.ToString(CultureInfo.CurrentCulture);
@@ -144,7 +141,7 @@ public partial class SkuEditorViewModel : ObservableObject
             Id = Id,
             Name = Name.Trim(),
             Category = Category,
-            PhoneModelId = PhoneModelId,
+            
             CaseType = CaseType,
             ProtectorType = ProtectorType,
             Cost = cost,

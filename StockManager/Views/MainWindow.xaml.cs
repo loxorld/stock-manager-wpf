@@ -81,9 +81,9 @@ public partial class MainWindow : Window
     {
         var skuQuery = _sp.GetRequiredService<ISkuQueryService>();
         var skuCommand = _sp.GetRequiredService<ISkuCommandService>();
-        var phoneModels = _sp.GetRequiredService<IPhoneModelQueryService>();
+        
 
-        var vm = new SkuEditorViewModel(skuQuery, skuCommand, phoneModels, id: null);
+        var vm = new SkuEditorViewModel(skuQuery, skuCommand, id: null);
         var win = new SkuEditorWindow(vm) { Owner = this };
 
         var ok = win.ShowDialog();
@@ -102,9 +102,9 @@ public partial class MainWindow : Window
 
         var skuQuery = _sp.GetRequiredService<ISkuQueryService>();
         var skuCommand = _sp.GetRequiredService<ISkuCommandService>();
-        var phoneModels = _sp.GetRequiredService<IPhoneModelQueryService>();
+        
 
-        var vm = new SkuEditorViewModel(skuQuery, skuCommand, phoneModels, id: _vm.SelectedItem.Id);
+        var vm = new SkuEditorViewModel(skuQuery, skuCommand, id: _vm.SelectedItem.Id);
         var win = new SkuEditorWindow(vm) { Owner = this };
 
         var ok = win.ShowDialog();
@@ -112,11 +112,7 @@ public partial class MainWindow : Window
             await _vm.LoadAsync();
     }
 
-    private void PhoneModels_Click(object sender, RoutedEventArgs e)
-    {
-        var win = new PhoneModelsWindow(_sp) { Owner = this };
-        win.ShowDialog();
-    }
+   
 
     public static readonly RoutedUICommand NewSkuCmd = new("Nuevo SKU", "NewSkuCmd", typeof(MainWindow));
     public static readonly RoutedUICommand MovementCmd = new("Registrar movimiento", "MovementCmd", typeof(MainWindow));

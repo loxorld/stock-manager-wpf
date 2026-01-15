@@ -24,7 +24,7 @@ public class SkuCommandService : ISkuCommandService
         {
             Name = r.Name.Trim(),
             Category = r.Category,
-            PhoneModelId = r.PhoneModelId,
+            
             CaseType = r.CaseType,
             ProtectorType = r.ProtectorType,
 
@@ -50,7 +50,7 @@ public class SkuCommandService : ISkuCommandService
 
         sku.Name = r.Name.Trim();
         sku.Category = r.Category;
-        sku.PhoneModelId = r.PhoneModelId;
+        
         sku.CaseType = r.CaseType;
         sku.ProtectorType = r.ProtectorType;
 
@@ -73,14 +73,13 @@ public class SkuCommandService : ISkuCommandService
 
         if (r.Category == ProductCategory.Accessory)
         {
-            r.PhoneModelId = null;
+            
             r.CaseType = null;
             r.ProtectorType = null;
             return;
         }
 
-        if (r.PhoneModelId is null)
-            throw new ArgumentException("El modelo de celular es obligatorio.");
+        
 
         if (r.Category == ProductCategory.Case && r.CaseType is null)
             throw new ArgumentException("El tipo de funda es obligatorio.");
