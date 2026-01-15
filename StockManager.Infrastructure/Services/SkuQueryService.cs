@@ -26,8 +26,8 @@ public class SkuQueryService : ISkuQueryService
         //  búsqueda case-insensitive por Name
         if (!string.IsNullOrWhiteSpace(searchText))
         {
-            var s = searchText.Trim().ToLower();
-            q = q.Where(x => x.Name.ToLower().Contains(s));
+            var s = searchText.Trim();
+            q = q.Where(x => EF.Functions.Like(x.Name, $"%{s}%"));
         }
 
         if (category.HasValue)

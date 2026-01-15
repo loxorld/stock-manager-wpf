@@ -11,8 +11,8 @@ using StockManager.Infrastructure.Persistence;
 namespace StockManager.Infrastructure.Migrations
 {
     [DbContext(typeof(StockDbContext))]
-    [Migration("20260115104949_CascadeDeleteSkuMovements")]
-    partial class CascadeDeleteSkuMovements
+    [Migration("20260115202943_InitClean")]
+    partial class InitClean
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,62 +55,6 @@ namespace StockManager.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("skus", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Active = true,
-                            CaseType = 2,
-                            Category = 1,
-                            Cost = 1500m,
-                            Name = "Funda silicona Samsung A02",
-                            Price = 3000m,
-                            Stock = 10
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Active = true,
-                            CaseType = 1,
-                            Category = 1,
-                            Cost = 1400m,
-                            Name = "Funda transparente Samsung A20",
-                            Price = 2800m,
-                            Stock = 7
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Active = true,
-                            Category = 2,
-                            Cost = 1200m,
-                            Name = "Templado reforzado Samsung A02",
-                            Price = 2500m,
-                            ProtectorType = 2,
-                            Stock = 12
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Active = true,
-                            Category = 2,
-                            Cost = 1800m,
-                            Name = "Templado anti-espía Samsung A20",
-                            Price = 3500m,
-                            ProtectorType = 3,
-                            Stock = 5
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Active = true,
-                            Category = 3,
-                            Cost = 4000m,
-                            Name = "Cargador 20W USB-C",
-                            Price = 7500m,
-                            Stock = 6
-                        });
                 });
 
             modelBuilder.Entity("StockManager.Domain.Entities.StockMovement", b =>

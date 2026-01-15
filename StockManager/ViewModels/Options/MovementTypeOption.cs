@@ -8,13 +8,13 @@ namespace StockManager.ViewModels;
 public sealed class MovementTypeOption
 {
     public StockMovementType Value { get; }
-    public string Text { get; }
+    public string Display { get; }
 
-    public MovementTypeOption(StockMovementType value, string text)
+    public MovementTypeOption(StockMovementType value, string display)
     {
         Value = value;
-        Text = text;
+        Display = display;
     }
 
-    public override string ToString() => Text; 
+    public override string ToString() => Display;
 }

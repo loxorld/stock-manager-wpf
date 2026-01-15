@@ -17,7 +17,7 @@ public class UpsertSkuRequest
     public CaseType? CaseType { get; set; }
     public ProtectorType? ProtectorType { get; set; }
 
-    public int Stock { get; set; }
+    
     public decimal Cost { get; set; }
     public decimal Price { get; set; }
 

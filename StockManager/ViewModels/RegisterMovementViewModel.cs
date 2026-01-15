@@ -151,15 +151,5 @@ public partial class RegisterMovementViewModel : ObservableObject
         }
     }
 
-    public sealed class MovementTypeOption
-    {
-        public StockMovementType Value { get; }
-        public string Display { get; }
-
-        public MovementTypeOption(StockMovementType value, string display)
-        {
-            Value = value;
-            Display = display;
-        }
-    }
+    
 }

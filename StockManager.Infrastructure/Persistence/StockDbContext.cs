@@ -32,76 +32,7 @@ public class StockDbContext : DbContext
             
         });
 
-        // Seed inicial
         
-
-        modelBuilder.Entity<Sku>().HasData(
-            new Sku
-            {
-                Id = 1,
-                Category = ProductCategory.Case,
-                Name = "Funda silicona Samsung A02",
-                
-                CaseType = CaseType.Silicone,
-                ProtectorType = null,
-                Stock = 10,
-                Cost = 1500m,
-                Price = 3000m,
-                Active = true
-            },
-            new Sku
-            {
-                Id = 2,
-                Category = ProductCategory.Case,
-                Name = "Funda transparente Samsung A20",
-                
-                CaseType = CaseType.Transparent,
-                ProtectorType = null,
-                Stock = 7,
-                Cost = 1400m,
-                Price = 2800m,
-                Active = true
-            },
-            new Sku
-            {
-                Id = 3,
-                Category = ProductCategory.ScreenProtector,
-                Name = "Templado reforzado Samsung A02",
-               
-                CaseType = null,
-                ProtectorType = ProtectorType.Reinforced,
-                Stock = 12,
-                Cost = 1200m,
-                Price = 2500m,
-                Active = true
-            },
-            new Sku
-            {
-                Id = 4,
-                Category = ProductCategory.ScreenProtector,
-                Name = "Templado anti-espía Samsung A20",
-                
-                CaseType = null,
-                ProtectorType = ProtectorType.Privacy,
-                Stock = 5,
-                Cost = 1800m,
-                Price = 3500m,
-                Active = true
-            },
-            new Sku
-            {
-                Id = 5,
-                Category = ProductCategory.Accessory,
-                Name = "Cargador 20W USB-C",
-                
-                CaseType = null,
-                ProtectorType = null,
-                Stock = 6,
-                Cost = 4000m,
-                Price = 7500m,
-                Active = true
-            }
-        );
 
         modelBuilder.Entity<StockMovement>(e =>
         {

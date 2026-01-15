@@ -100,24 +100,9 @@
 
                 <Separator Width="12" Opacity="0"/>
 
-                <Button Click="RegisterMovement_Click"
-                        ToolTip="Registrar movimiento (Ctrl+M)"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Margin="0,0,8,0">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="SwapVertical" Width="18" Height="18" Margin="0,0,8,0"/>
-                        <TextBlock Text="Movimiento"/>
-                    </StackPanel>
-                </Button>
+                
 
-                <Button Click="ViewHistory_Click"
-                        ToolTip="Ver historial"
-                        Style="{StaticResource MaterialDesignOutlinedButton}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="History" Width="18" Height="18" Margin="0,0,8,0"/>
-                        <TextBlock Text="Historial"/>
-                    </StackPanel>
-                </Button>
+                
 
             </ToolBar>
         </DockPanel>
