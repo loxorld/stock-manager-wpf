@@ -50,6 +50,8 @@ public partial class App : System.Windows.Application
         {
             await _host.StartAsync();
 
+            DbBackupService.CreateBackup();
+
             using (var scope = _host.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<StockDbContext>();
