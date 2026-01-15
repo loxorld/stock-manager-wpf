@@ -113,7 +113,7 @@ public class StockDbContext : DbContext
             e.HasOne(x => x.Sku)
              .WithMany()
              .HasForeignKey(x => x.SkuId)
-             .OnDelete(DeleteBehavior.Cascade); // ✅ antes estaba Restrict
+             .OnDelete(DeleteBehavior.Cascade); //  antes estaba Restrict
 
             e.HasIndex(x => x.SkuId);
             e.HasIndex(x => x.CreatedAt);

@@ -10,17 +10,11 @@
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Título -->
             <RowDefinition Height="Auto"/>
-            <!-- Tipo -->
             <RowDefinition Height="Auto"/>
-            <!-- Cantidad -->
             <RowDefinition Height="Auto"/>
-            <!-- Nota -->
             <RowDefinition Height="Auto"/>
-            <!-- Error -->
             <RowDefinition Height="Auto"/>
-            <!-- Botones -->
         </Grid.RowDefinitions>
 
         <!-- Título -->
@@ -41,9 +35,10 @@
                        VerticalAlignment="Center"/>
 
             <ComboBox Grid.Column="1"
-                      x:Name="TypeCombo"
                       Width="260"
-                      SelectedItem="{Binding Type}" />
+                      ItemsSource="{Binding MovementTypeOptions}"
+                      DisplayMemberPath="Display"
+                      SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}"/>
         </Grid>
 
         <!-- Cantidad -->
@@ -59,8 +54,7 @@
             <TextBox Grid.Column="1"
                      Width="120"
                      VerticalContentAlignment="Center"
-                     Text="{Binding QuantityText, UpdateSourceTrigger=PropertyChanged}"
- />
+                     Text="{Binding QuantityText, UpdateSourceTrigger=PropertyChanged}"/>
         </Grid>
 
         <!-- Nota -->
@@ -77,7 +71,9 @@
         <TextBlock Grid.Row="4"
                    Text="{Binding ErrorMessage}"
                    Foreground="DarkRed"
-                   Margin="0,0,0,10"/>
+                   Margin="0,0,0,10"
+                   TextWrapping="Wrap"
+                   Width="360"/>
 
         <!-- Botones -->
         <StackPanel Grid.Row="5"
@@ -94,4 +90,3 @@
         </StackPanel>
     </Grid>
 </Window>
-

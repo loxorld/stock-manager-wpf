@@ -12,14 +12,14 @@
                                              PrimaryColor="Blue"
                                              SecondaryColor="Cyan" />
 
-                <!-- Defaults: elegí 2 (clásico) o 3 (más moderno) -->
+                <!-- Defaults:  2 (clásico) o 3 (más moderno) -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
-                <!-- Si querés Material 3, cambiá la línea de arriba por esta:
+                <!-- Material 3, cambiar la línea de arriba por esta:
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
                 -->
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Lo tuyo, intacto -->
+            
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <conv:BooleanToOpacityConverter x:Key="BooleanToOpacityConverter"/>
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using StockManager.Domain.Enums;
 using StockManager.ViewModels;
 
 namespace StockManager.Views;
@@ -13,14 +12,6 @@ public partial class RegisterMovementWindow : Window
     {
         InitializeComponent();
         DataContext = vm;
-
-        TypeCombo.ItemsSource = new[]
-        {
-            StockMovementType.PurchaseEntry,
-            StockMovementType.Sale,
-            StockMovementType.Shrinkage,
-            StockMovementType.Adjustment
-        };
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -35,10 +26,12 @@ public partial class RegisterMovementWindow : Window
         {
             await Vm.SaveAsync();
 
-            // Si el VM detectó error de negocio/validación, lo mostramos con UiError
             if (!string.IsNullOrWhiteSpace(Vm.ErrorMessage))
             {
-                UiError.Show(new InvalidOperationException(Vm.ErrorMessage), "No se pudo registrar el movimiento");
+                UiError.Show(
+                    new InvalidOperationException(Vm.ErrorMessage),
+                    "No se pudo registrar el movimiento"
+                );
                 return;
             }
 
@@ -47,7 +40,6 @@ public partial class RegisterMovementWindow : Window
         }
         catch (Exception ex)
         {
-            // Red de seguridad: cualquier cosa inesperada
             UiError.Show(ex, "Error inesperado");
         }
     }

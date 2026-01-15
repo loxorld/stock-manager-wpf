@@ -28,7 +28,7 @@ public class SkuCommandService : ISkuCommandService
             CaseType = r.CaseType,
             ProtectorType = r.ProtectorType,
 
-            Stock = 0, // ✅ stock inicial siempre 0, luego solo movimientos
+            Stock = 0, //  stock inicial siempre 0, luego solo movimientos
 
             Cost = r.Cost,
             Price = r.Price,
@@ -54,7 +54,7 @@ public class SkuCommandService : ISkuCommandService
         sku.CaseType = r.CaseType;
         sku.ProtectorType = r.ProtectorType;
 
-        // ✅ NO tocamos sku.Stock
+       
 
         sku.Cost = r.Cost;
         sku.Price = r.Price;

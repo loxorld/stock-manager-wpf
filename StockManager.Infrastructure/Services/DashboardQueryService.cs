@@ -15,29 +15,28 @@ public class DashboardQueryService : IDashboardQueryService
         _db = db;
     }
 
+    // KPI: “ventas reales” = Sale con UnitPrice histórico guardado
     public async Task<DashboardSummaryDto> GetSummaryAsync(DateTime fromUtc, DateTime toUtc)
     {
-        // Ventas reales: Type = Sale, UnitPrice no null
         var q = _db.StockMovements.AsNoTracking()
             .Where(m => m.CreatedAt >= fromUtc && m.CreatedAt < toUtc)
             .Where(m => m.Type == StockMovementType.Sale)
             .Where(m => m.UnitPrice != null);
 
-        var sales = await q.Select(m => new
-        {
-            Qty = m.SignedQuantity,      // negativo
-            Price = m.UnitPrice!.Value
-        }).ToListAsync();
+        // SignedQuantity en venta es negativo. Para unidades/revenue usamos ABS.
+        var unitsSold = await q.SumAsync(m => (int?)Math.Abs(m.SignedQuantity)) ?? 0;
 
-        var units = sales.Sum(x => Math.Abs(x.Qty));
-        var revenue = sales.Sum(x => x.Price * Math.Abs(x.Qty));
-        var count = sales.Count;
+        var revenue = await q.SumAsync(m =>
+            (decimal?)(m.UnitPrice!.Value * Math.Abs(m.SignedQuantity))
+        ) ?? 0m;
+
+        var salesCount = await q.CountAsync();
 
         return new DashboardSummaryDto
         {
-            UnitsSold = units,
+            UnitsSold = unitsSold,
             Revenue = revenue,
-            SalesCount = count
+            SalesCount = salesCount
         };
     }
 
@@ -47,7 +46,7 @@ public class DashboardQueryService : IDashboardQueryService
             .Where(m => m.CreatedAt >= fromUtc && m.CreatedAt < toUtc)
             .Where(m => m.Type == StockMovementType.Sale)
             .Where(m => m.UnitPrice != null)
-            .GroupBy(m => new { m.SkuId, m.Sku!.Name })
+            .GroupBy(m => new { m.SkuId, Name = m.Sku!.Name })
             .Select(g => new DashboardTopItemDto
             {
                 SkuId = g.Key.SkuId,
@@ -69,7 +68,7 @@ public class DashboardQueryService : IDashboardQueryService
             .Where(m => m.CreatedAt >= fromUtc && m.CreatedAt < toUtc)
             .Where(m => m.Type == StockMovementType.Sale)
             .Where(m => m.UnitPrice != null)
-            .GroupBy(m => new { m.SkuId, m.Sku!.Name })
+            .GroupBy(m => new { m.SkuId, Name = m.Sku!.Name })
             .Select(g => new DashboardTopItemDto
             {
                 SkuId = g.Key.SkuId,
@@ -83,5 +82,39 @@ public class DashboardQueryService : IDashboardQueryService
             .ToListAsync();
 
         return data;
+    }
+
+    public async Task<List<DashboardSaleHistoryItemDto>> GetSalesHistoryAsync(DateTime fromUtc, DateTime toUtc)
+    {
+        var q = _db.StockMovements
+            .AsNoTracking()
+            .Where(m => m.CreatedAt >= fromUtc && m.CreatedAt < toUtc)
+            .Where(m => m.Type == StockMovementType.Sale)
+            .OrderByDescending(m => m.CreatedAt);
+
+        // Si quuiero que el historial sea 100% consistente con KPIs (ventas reales), la linea de abajo:
+        // q = q.Where(m => m.UnitPrice != null);
+
+        var items = await q
+            .Select(m => new DashboardSaleHistoryItemDto
+            {
+                CreatedAt = m.CreatedAt,
+                SkuName = m.Sku != null ? m.Sku.Name : ("SKU #" + m.SkuId),
+
+                // venta => SignedQuantity es negativo
+                Quantity = -m.SignedQuantity,
+
+                // precio histórico si existe, sino fallback al precio actual
+                UnitPrice = m.UnitPrice ?? (m.Sku != null ? m.Sku.Price : 0m),
+
+                Total = (-m.SignedQuantity) * (m.UnitPrice ?? (m.Sku != null ? m.Sku.Price : 0m)),
+                Note = m.Note
+            })
+            .ToListAsync();
+
+        foreach (var it in items)
+            it.CreatedAt = it.CreatedAt.ToLocalTime();
+
+        return items;
     }
 }

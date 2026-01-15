@@ -3,6 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using StockManager.Application.Dtos;
 using StockManager.Application.Services;
 using StockManager.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace StockManager.ViewModels;
 
@@ -15,10 +19,36 @@ public partial class RegisterMovementViewModel : ObservableObject
     [ObservableProperty]
     private string skuName;
 
+    // Enum “real”
     [ObservableProperty]
     private StockMovementType type = StockMovementType.Sale;
 
-    // 🔥 Importante: string para permitir escribir "-" y validar después
+    // Opciones para el ComboBox (texto lindo + valor real)
+    public IReadOnlyList<MovementTypeOption> MovementTypeOptions { get; } =
+        new List<MovementTypeOption>
+        {
+            new(StockMovementType.Sale, "Venta"),
+            new(StockMovementType.PurchaseEntry, "Compra"),
+            new(StockMovementType.Adjustment, "Ajuste de stock (+ / -)"),
+            new(StockMovementType.Shrinkage, "Pérdida / merma")
+        };
+
+    // Lo que selecciona el ComboBox
+    private MovementTypeOption selectedTypeOption = null!;
+    public MovementTypeOption SelectedTypeOption
+    {
+        get => selectedTypeOption;
+        set
+        {
+            if (SetProperty(ref selectedTypeOption, value))
+            {
+                // Sincroniza el enum real
+                Type = value.Value;
+            }
+        }
+    }
+
+    // string para permitir "-" en ajuste
     [ObservableProperty]
     private string quantityText = "1";
 
@@ -33,6 +63,18 @@ public partial class RegisterMovementViewModel : ObservableObject
         _service = service;
         SkuId = skuId;
         SkuName = skuName;
+
+        // Default: Venta
+        SelectedTypeOption = MovementTypeOptions.First(x => x.Value == Type);
+    }
+
+    // Si Type cambia por algún motivo, mantenemos sincronizado el combo.
+    partial void OnTypeChanged(StockMovementType value)
+    {
+        var opt = MovementTypeOptions.FirstOrDefault(x => x.Value == value);
+        if (opt != null && !ReferenceEquals(opt, SelectedTypeOption))
+            selectedTypeOption = opt; // set directo para evitar loop
+        OnPropertyChanged(nameof(SelectedTypeOption));
     }
 
     [RelayCommand]
@@ -90,7 +132,9 @@ public partial class RegisterMovementViewModel : ObservableObject
             {
                 // Adjustment acepta signo
                 req.SignedQuantity = qty;
-                req.Quantity = 1; // no se usa en Adjustment, pero lo dejamos con un valor válido
+
+                // no se usa en Adjustment, pero lo dejamos válido
+                req.Quantity = 1;
             }
             else
             {
@@ -104,9 +148,18 @@ public partial class RegisterMovementViewModel : ObservableObject
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
-            return;
+        }
+    }
+
+    public sealed class MovementTypeOption
+    {
+        public StockMovementType Value { get; }
+        public string Display { get; }
+
+        public MovementTypeOption(StockMovementType value, string display)
+        {
+            Value = value;
+            Display = display;
         }
     }
 }
-
-

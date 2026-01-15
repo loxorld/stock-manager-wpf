@@ -23,7 +23,7 @@ public class SkuQueryService : ISkuQueryService
     {
         var q = _db.Skus.AsNoTracking();
 
-        // ✅ búsqueda case-insensitive por Name
+        //  búsqueda case-insensitive por Name
         if (!string.IsNullOrWhiteSpace(searchText))
         {
             var s = searchText.Trim().ToLower();

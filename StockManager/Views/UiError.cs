@@ -7,7 +7,7 @@ public static class UiError
 {
     public static void Show(Exception ex, string title = "Error")
     {
-        // Mensajes “amigables” para negocio
+        
         var msg = ex switch
         {
             ArgumentException => ex.Message,

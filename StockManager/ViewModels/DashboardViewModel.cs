@@ -36,6 +36,9 @@ public partial class DashboardViewModel : ObservableObject
     public ObservableCollection<DashboardTopItemDto> TopByUnits { get; } = new();
     public ObservableCollection<DashboardTopItemDto> TopByRevenue { get; } = new();
 
+    public ObservableCollection<DashboardSaleHistoryItemDto> SalesHistory { get; } = new();
+
+
     public DashboardViewModel(IDashboardQueryService dashboard)
     {
         _dashboard = dashboard;
@@ -59,26 +62,24 @@ public partial class DashboardViewModel : ObservableObject
         try
         {
             var (fromUtc, toUtc) = SelectedPeriod == DashboardPeriod.Range
-            ? GetCustomRangeUtc()
-            : GetRangeUtc(SelectedPeriod);
-
+                ? GetCustomRangeUtc()
+                : GetRangeUtc(SelectedPeriod);
 
             var summary = await _dashboard.GetSummaryAsync(fromUtc, toUtc);
             Revenue = summary.Revenue;
             UnitsSold = summary.UnitsSold;
             SalesCount = summary.SalesCount;
 
-            var topUnits = await _dashboard.GetTopByUnitsAsync(fromUtc, toUtc, 5);
-            TopByUnits.Clear();
-            foreach (var it in topUnits) TopByUnits.Add(it);
+            var history = await _dashboard.GetSalesHistoryAsync(fromUtc, toUtc);
+            SalesHistory.Clear();
+            foreach (var it in history) SalesHistory.Add(it);
 
-            var topRev = await _dashboard.GetTopByRevenueAsync(fromUtc, toUtc, 5);
+            
+            TopByUnits.Clear();
             TopByRevenue.Clear();
-            foreach (var it in topRev) TopByRevenue.Add(it);
         }
         catch (Exception ex)
         {
-            
             UiError.Show(ex, "Error al actualizar el dashboard");
         }
         finally
@@ -86,6 +87,7 @@ public partial class DashboardViewModel : ObservableObject
             IsLoading = false;
         }
     }
+
 
     private (DateTime fromUtc, DateTime toUtc) GetCustomRangeUtc()
     {

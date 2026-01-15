@@ -31,7 +31,7 @@
         <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="True">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
                 <materialDesign:PackIcon Kind="PackageVariantClosed" Width="22" Height="22" Margin="0,0,10,0" Opacity="0.9"/>
-                <TextBlock Text="Stock" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <TextBlock Text="Planeta Celular" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
             </StackPanel>
 
             <!-- Actions -->
@@ -59,7 +59,7 @@
                         Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0"/>
-                        <TextBlock Text="Nuevo SKU"/>
+                        <TextBlock Text="Nuevo Item"/>
                     </StackPanel>
                 </Button>
 
@@ -73,7 +73,7 @@
                     </StackPanel>
                 </Button>
 
-                <!-- Eliminar SKU (prolijo, rojo, y deshabilitado sin selección) -->
+                <!-- Eliminar SKU  -->
                 <Button Click="DeleteSku_Click"
                         ToolTip="Eliminar SKU seleccionado"
                         Margin="0,0,8,0">
