@@ -62,7 +62,7 @@ public partial class StockViewModel : ObservableObject
 
     [ObservableProperty] private string detailTitle = "Seleccioná un ítem";
     [ObservableProperty] private string detailCategory = "-";
-    [ObservableProperty] private string detailPhoneModel = "-";
+    
     [ObservableProperty] private string detailActive = "-";
 
     [ObservableProperty] private int detailStock;
@@ -148,7 +148,7 @@ public partial class StockViewModel : ObservableObject
         {
             DetailTitle = "Seleccioná un ítem";
             DetailCategory = "-";
-            DetailPhoneModel = "-";
+            
             DetailActive = "-";
             DetailStock = 0;
             DetailPrice = 0;

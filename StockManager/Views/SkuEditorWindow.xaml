@@ -16,8 +16,7 @@
             <RowDefinition Height="Auto"/>
             <!-- Category -->
             <RowDefinition Height="Auto"/>
-            <!-- Phone model -->
-            <RowDefinition Height="Auto"/>
+            
             <!-- Case type -->
             <RowDefinition Height="Auto"/>
             <!-- Protector type -->
@@ -58,17 +57,8 @@
                       SelectedItem="{Binding Category}"/>
         </Grid>
 
-        <!-- Modelo -->
-        <Grid Grid.Row="3" Margin="0,0,0,8" Opacity="{Binding IsPhoneModelEnabled, Converter={StaticResource BooleanToOpacityConverter}}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="140"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            
-        </Grid>
-
         <!-- Tipo funda -->
-        <Grid Grid.Row="4" Margin="0,0,0,8" Opacity="{Binding IsCaseTypeEnabled, Converter={StaticResource BooleanToOpacityConverter}}">
+        <Grid Grid.Row="3" Margin="0,0,0,8" Opacity="{Binding IsCaseTypeEnabled, Converter={StaticResource BooleanToOpacityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="140"/>
                 <ColumnDefinition Width="*"/>
@@ -82,7 +72,7 @@
         </Grid>
 
         <!-- Tipo templado -->
-        <Grid Grid.Row="5" Margin="0,0,0,8" Opacity="{Binding IsProtectorTypeEnabled, Converter={StaticResource BooleanToOpacityConverter}}">
+        <Grid Grid.Row="4" Margin="0,0,0,8" Opacity="{Binding IsProtectorTypeEnabled, Converter={StaticResource BooleanToOpacityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="140"/>
                 <ColumnDefinition Width="*"/>
@@ -96,7 +86,7 @@
         </Grid>
 
         <!-- Costo / Precio / Activo -->
-        <Grid Grid.Row="6" Margin="0,0,0,8">
+        <Grid Grid.Row="5" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="140"/>
                 <ColumnDefinition Width="*"/>
@@ -110,13 +100,13 @@
         </Grid>
 
         <!-- Error -->
-        <TextBlock Grid.Row="7"
+        <TextBlock Grid.Row="6"
                    Text="{Binding ErrorMessage}"
                    Foreground="DarkRed"
                    Margin="0,8,0,0"/>
 
         <!-- Botones -->
-        <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
             <Button Content="Cancelar" Width="90" Margin="0,0,8,0" Click="Cancel_Click"/>
             <Button Content="Guardar" Width="90" Click="Save_Click"/>
         </StackPanel>

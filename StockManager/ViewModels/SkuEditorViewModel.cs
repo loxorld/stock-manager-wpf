@@ -42,7 +42,7 @@ public partial class SkuEditorViewModel : ObservableObject
                 // Cuando cambia categoría, limpiamos lo que no aplica.
                 if (category == ProductCategory.Accessory)
                 {
-                    PhoneModelId = null;
+                    
                     CaseType = null;
                     ProtectorType = null;
                 }
@@ -55,14 +55,14 @@ public partial class SkuEditorViewModel : ObservableObject
                     CaseType = null;
                 }
 
-                OnPropertyChanged(nameof(IsPhoneModelEnabled));
+                
                 OnPropertyChanged(nameof(IsCaseTypeEnabled));
                 OnPropertyChanged(nameof(IsProtectorTypeEnabled));
             }
         }
     }
 
-    [ObservableProperty] private int? phoneModelId;
+    
     [ObservableProperty] private CaseType? caseType;
     [ObservableProperty] private ProtectorType? protectorType;
 
@@ -71,8 +71,8 @@ public partial class SkuEditorViewModel : ObservableObject
     [ObservableProperty] private bool active = true;
     [ObservableProperty] private string? errorMessage;
 
-    // ✅ Para habilitar/deshabilitar campos según categoría (no ocultamos, pero queda claro y consistente)
-    public bool IsPhoneModelEnabled => Category != ProductCategory.Accessory;
+    //  Para habilitar/deshabilitar campos según categoría (no ocultamos, pero queda claro y consistente)
+    
     public bool IsCaseTypeEnabled => Category == ProductCategory.Case;
     public bool IsProtectorTypeEnabled => Category == ProductCategory.ScreenProtector;
 

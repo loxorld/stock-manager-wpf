@@ -77,6 +77,11 @@ public partial class DashboardViewModel : ObservableObject
             
             TopByUnits.Clear();
             TopByRevenue.Clear();
+            var topByUnits = await _dashboard.GetTopByUnitsAsync(fromUtc, toUtc);
+            foreach (var it in topByUnits) TopByUnits.Add(it);
+
+            var topByRevenue = await _dashboard.GetTopByRevenueAsync(fromUtc, toUtc);
+            foreach (var it in topByRevenue) TopByRevenue.Add(it);
         }
         catch (Exception ex)
         {
