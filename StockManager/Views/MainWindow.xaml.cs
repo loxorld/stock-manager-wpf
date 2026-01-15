@@ -118,5 +118,24 @@ public partial class MainWindow : Window
         win.ShowDialog();
     }
 
+    public static readonly RoutedUICommand NewSkuCmd = new("Nuevo SKU", "NewSkuCmd", typeof(MainWindow));
+    public static readonly RoutedUICommand MovementCmd = new("Registrar movimiento", "MovementCmd", typeof(MainWindow));
+
+    private void NewSku_Executed(object sender, ExecutedRoutedEventArgs e)
+    {
+        NewSku_Click(sender, e);
+    }
+
+    private void Movement_Executed(object sender, ExecutedRoutedEventArgs e)
+    {
+        RegisterMovement_Click(sender, e);
+    }
+
+    private void Dashboard_Click(object sender, RoutedEventArgs e)
+    {
+        var win = _sp.GetRequiredService<DashboardWindow>();
+        win.Owner = this;
+        win.ShowDialog();
+    }
 
 }

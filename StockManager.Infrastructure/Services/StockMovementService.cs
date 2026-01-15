@@ -18,35 +18,60 @@ public class StockMovementService : IStockMovementService
 
     public async Task RegisterAsync(RegisterMovementRequest request)
     {
-        if (request == null) throw new ArgumentNullException(nameof(request));
+        if (request.Type != StockMovementType.Adjustment)
+        {
+            // Para Sale / PurchaseEntry / Shrinkage: Quantity debe ser > 0
+            if (request.Quantity <= 0)
+                throw new ArgumentException("La cantidad debe ser mayor a 0.");
+        }
+        else
+        {
+            // Para Adjustment: se usa SignedQuantity
+            if (!request.SignedQuantity.HasValue || request.SignedQuantity.Value == 0)
+                throw new ArgumentException("En un ajuste, la cantidad firmada no puede ser 0.");
+        }
 
         var sku = await _db.Skus.FirstOrDefaultAsync(x => x.Id == request.SkuId);
         if (sku == null)
             throw new InvalidOperationException("SKU inexistente.");
 
-        // Nota normalizada
-        var note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim();
-
-        // Validaciones por tipo (reglas del negocio)
-        if (request.Type == StockMovementType.Shrinkage && note == null)
-            throw new ArgumentException("La nota es obligatoria para una merma.");
-
-        if (request.Type == StockMovementType.Adjustment && note == null)
-            throw new ArgumentException("La nota es obligatoria para un ajuste.");
-
-        // Calcular cantidad con signo (la verdad absoluta)
+        // Calcular signedQty real a aplicar al stock
         int signedQty = request.Type switch
         {
-            StockMovementType.PurchaseEntry => ValidatePositive(request.Quantity, "La cantidad debe ser mayor a 0."),
-            StockMovementType.Sale => -ValidatePositive(request.Quantity, "La cantidad debe ser mayor a 0."),
-            StockMovementType.Shrinkage => -ValidatePositive(request.Quantity, "La cantidad debe ser mayor a 0."),
-            StockMovementType.Adjustment => ValidateNonZeroSigned(request.SignedQuantity, "El ajuste debe ser distinto de 0."),
+            StockMovementType.PurchaseEntry => +request.Quantity,
+            StockMovementType.Sale => -request.Quantity,
+            StockMovementType.Shrinkage => -request.Quantity,
+            StockMovementType.Adjustment => request.SignedQuantity!.Value,
             _ => throw new InvalidOperationException("Tipo de movimiento inválido.")
         };
 
         var newStock = sku.Stock + signedQty;
         if (newStock < 0)
             throw new InvalidOperationException("Stock insuficiente para realizar el movimiento.");
+
+        // Captura de valores “históricos” 
+        decimal? unitPrice = null;
+        decimal? unitCost = null;
+
+        switch (request.Type)
+        {
+            case StockMovementType.Sale:
+                unitPrice = sku.Price; // precio vigente en el momento de vender
+                unitCost = sku.Cost;   // costo vigente (sirve para margen)
+                break;
+
+            case StockMovementType.PurchaseEntry:
+                // Compra: el costo tiene sentido; precio es opcional
+                unitCost = sku.Cost;
+                unitPrice = sku.Price; // opcional, puede servir para análisis
+                break;
+
+            case StockMovementType.Shrinkage:
+            case StockMovementType.Adjustment:
+                // No “genera ingresos”, pero el costo sirve si después quiero valuación
+                unitCost = sku.Cost;
+                break;
+        }
 
         using var tx = await _db.Database.BeginTransactionAsync();
 
@@ -57,23 +82,13 @@ public class StockMovementService : IStockMovementService
             SkuId = sku.Id,
             Type = request.Type,
             SignedQuantity = signedQty,
-            Note = note,
+            UnitPrice = unitPrice,
+            UnitCost = unitCost,
+            Note = request.Note,
             CreatedAt = DateTime.UtcNow
         });
 
         await _db.SaveChangesAsync();
         await tx.CommitAsync();
-    }
-
-    private static int ValidatePositive(int value, string message)
-    {
-        if (value <= 0) throw new ArgumentException(message);
-        return value;
-    }
-
-    private static int ValidateNonZeroSigned(int? value, string message)
-    {
-        if (value is null || value.Value == 0) throw new ArgumentException(message);
-        return value.Value;
     }
 }

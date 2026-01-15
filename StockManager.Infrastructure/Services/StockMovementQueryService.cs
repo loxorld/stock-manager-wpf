@@ -23,19 +23,19 @@ public class StockMovementQueryService : IStockMovementQueryService
             .Select(x => new StockMovementListItemDto
             {
                 Id = x.Id,
-                CreatedAt = x.CreatedAt,
+                CreatedAt = x.CreatedAt,      // UTC en DB
                 Type = x.Type.ToString(),
                 SignedQuantity = x.SignedQuantity,
+                UnitPrice = x.UnitPrice,
+                UnitCost = x.UnitCost,
                 Note = x.Note
             })
             .ToListAsync();
 
-        // Convierto a local time afuera del query 
-        foreach (var it in items)
-            it.CreatedAt = it.CreatedAt.ToLocalTime();
+        // Convertimos a hora local fuera del query 
+        for (int i = 0; i < items.Count; i++)
+            items[i].CreatedAt = items[i].CreatedAt.ToLocalTime();
 
         return items;
     }
 }
-
-

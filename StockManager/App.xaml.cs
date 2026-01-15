@@ -31,6 +31,9 @@ public partial class App : System.Windows.Application
                 services.AddTransient<IStockMovementService, StockMovementService>();
                 services.AddTransient<IStockMovementQueryService, StockMovementQueryService>();
                 services.AddTransient<StockManager.Application.Services.IPhoneModelCommandService, StockManager.Infrastructure.Services.PhoneModelCommandService>();
+                services.AddTransient<StockManager.Application.Services.IDashboardQueryService, StockManager.Infrastructure.Services.DashboardQueryService>();
+                services.AddTransient<StockManager.ViewModels.DashboardViewModel>();
+                services.AddTransient<StockManager.Views.DashboardWindow>();
 
 
                 // ViewModels
@@ -44,19 +47,28 @@ public partial class App : System.Windows.Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
-        await _host.StartAsync();
-
-        using (var scope = _host.Services.CreateScope())
+        try
         {
-            var db = scope.ServiceProvider.GetRequiredService<StockDbContext>();
-            await db.Database.MigrateAsync();
+            await _host.StartAsync();
+
+            using (var scope = _host.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<StockDbContext>();
+                await db.Database.MigrateAsync();
+            }
+
+            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+
+            base.OnStartup(e);
         }
-
-        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-        mainWindow.Show();
-
-        base.OnStartup(e);
+        catch (Exception ex)
+        {
+            UiError.Show(ex, "No se pudo iniciar la aplicación");
+            Shutdown(); // cierre controlado
+        }
     }
+
 
     protected override async void OnExit(ExitEventArgs e)
     {

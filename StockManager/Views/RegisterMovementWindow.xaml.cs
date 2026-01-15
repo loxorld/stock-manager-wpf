@@ -1,14 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using StockManager.Domain.Enums;
 using StockManager.ViewModels;
 
@@ -40,14 +31,24 @@ public partial class RegisterMovementWindow : Window
 
     private async void Save_Click(object sender, RoutedEventArgs e)
     {
-        await Vm.SaveAsync();
-
-        if (string.IsNullOrWhiteSpace(Vm.ErrorMessage))
+        try
         {
+            await Vm.SaveAsync();
+
+            // Si el VM detectó error de negocio/validación, lo mostramos con UiError
+            if (!string.IsNullOrWhiteSpace(Vm.ErrorMessage))
+            {
+                UiError.Show(new InvalidOperationException(Vm.ErrorMessage), "No se pudo registrar el movimiento");
+                return;
+            }
+
             DialogResult = true;
             Close();
         }
+        catch (Exception ex)
+        {
+            // Red de seguridad: cualquier cosa inesperada
+            UiError.Show(ex, "Error inesperado");
+        }
     }
 }
-
-

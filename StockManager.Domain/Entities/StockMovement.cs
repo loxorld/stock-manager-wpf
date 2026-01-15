@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 using StockManager.Domain.Enums;
 
 namespace StockManager.Domain.Entities;
@@ -15,15 +12,15 @@ public class StockMovement
 
     public StockMovementType Type { get; set; }
 
-    
+    // Cantidad firmada: + entra, - sale
     public int SignedQuantity { get; set; }
+
+    // Precio/costo unitario al momento del movimiento 
+    public decimal? UnitPrice { get; set; }
+    public decimal? UnitCost { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Motivo o nota (ej: "rotura", "ajuste por conteo", "venta mostrador")
     public string? Note { get; set; }
-
-    
-
 }
-

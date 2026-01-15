@@ -1,90 +1,272 @@
 ﻿<Window x:Class="StockManager.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:StockManager.Views"
         Title="Stock Manager"
-        Height="520" Width="900">
+        Height="520" Width="980"
+        WindowStartupLocation="CenterScreen">
+
+    <!-- Atajos -->
+    <Window.InputBindings>
+        <!-- Enter = buscar -->
+        <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+
+        <!-- Ctrl+N = nuevo SKU -->
+        <KeyBinding Modifiers="Control" Key="N" Command="{x:Static local:MainWindow.NewSkuCmd}" />
+
+        <!-- Ctrl+M = movimiento -->
+        <KeyBinding Modifiers="Control" Key="M" Command="{x:Static local:MainWindow.MovementCmd}" />
+    </Window.InputBindings>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static local:MainWindow.NewSkuCmd}" Executed="NewSku_Executed"/>
+        <CommandBinding Command="{x:Static local:MainWindow.MovementCmd}" Executed="Movement_Executed"/>
+    </Window.CommandBindings>
 
     <Grid Margin="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Barra superior -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="True">
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="True">
             <TextBlock Text="Stock"
                        FontSize="22"
                        FontWeight="SemiBold"
                        VerticalAlignment="Center"
                        DockPanel.Dock="Left"/>
 
+            <!-- Acciones -->
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-
-                <Button Content="Modelos"
-                    Width="110"
-                    Margin="0,0,10,0"
-                    Click="PhoneModels_Click"/>
-
-
-                <Button Content="Nuevo SKU"
-                    Width="110"
-                    Margin="0,0,10,0"
-                    Click="NewSku_Click"/>
-
-                <Button Content="Editar SKU"
-                    Width="110"
-                    Margin="0,0,10,0"
-                    Click="EditSku_Click"/>     
-
-
-                <Button Content="Registrar movimiento"
-                        Width="170"
-                        Margin="0,0,10,0"
-                        Click="RegisterMovement_Click"/>
-
-                <Button Content="Ver historial"
-                        Width="120"
-                        Margin="0,0,10,0"
-                        Click="ViewHistory_Click"/>
-
-
-                <TextBox Width="320"
-                         Margin="0,0,10,0"
-                         VerticalContentAlignment="Center"
-                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <Button Content="Buscar"
-                        Width="90"
-                        Command="{Binding SearchCommand}"/>
+                <Button Content="Modelos" Width="100" Margin="0,0,8,0" Click="PhoneModels_Click"/>
+                <Button Content="Nuevo SKU" Width="110" Margin="0,0,8,0" Click="NewSku_Click"/>
+                <Button Content="Editar SKU" Width="110" Margin="0,0,8,0" Click="EditSku_Click"/>
+                <Button Content="Dashboard" Width="110" Margin="0,0,8,0" Click="Dashboard_Click"/>
+                <Separator Width="10" Opacity="0"/>
+                <Button Content="Registrar movimiento" Width="170" Margin="0,0,8,0" Click="RegisterMovement_Click"/>
+                <Button Content="Ver historial" Width="110" Margin="0,0,0,0" Click="ViewHistory_Click"/>
             </StackPanel>
         </DockPanel>
 
-        <!-- Tabla -->
-        <Grid Grid.Row="1">
-            <DataGrid ItemsSource="{Binding Items}"
-                      SelectedItem="{Binding SelectedItem}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      CanUserAddRows="False"
-                      Margin="0,0,0,0">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="3*"/>
-                    <DataGridTextColumn Header="Categoría" Binding="{Binding Category}" Width="1.3*"/>
-                    <DataGridTextColumn Header="Modelo" Binding="{Binding PhoneModel}" Width="1.5*"/>
-                    <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="0.8*"/>
-                    <DataGridTextColumn Header="Precio" Binding="{Binding Price, StringFormat={}{0:C}}" Width="1*"/>
-                </DataGrid.Columns>
-            </DataGrid>
+        <!-- Filtros -->
+        <Border Grid.Row="1"
+                Background="#0A000000"
+                BorderBrush="#20000000"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="10"
+                Margin="0,0,0,12">
+            <DockPanel LastChildFill="True">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
 
-            <!-- Loading overlay simple -->
-            <Border Background="#80FFFFFF"
-                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock Text="Cargando..."
-                           FontSize="18"
+                    <TextBlock Text="Categoría:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <ComboBox Width="170"
+                              Margin="0,0,14,0"
+                              ItemsSource="{Binding CategoryOptions}"
+                              SelectedItem="{Binding SelectedCategoryOption}"
+                              DisplayMemberPath="Display"/>
+
+                    <TextBlock Text="Estado:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <ComboBox Width="130"
+                              Margin="0,0,14,0"
+                              ItemsSource="{Binding ActiveOptions}"
+                              SelectedItem="{Binding SelectedActive}"/>
+
+                    <CheckBox Content="Stock bajo"
+                              VerticalAlignment="Center"
+                              Margin="0,0,6,0"
+                              IsChecked="{Binding StockLowOnly}"/>
+
+                    <TextBlock Text="≤" VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.75"/>
+                    <TextBox Width="48"
+                             VerticalContentAlignment="Center"
+                             Text="{Binding StockLowThreshold, UpdateSourceTrigger=PropertyChanged}"/>
+
+                </StackPanel>
+
+                <!-- Búsqueda -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <TextBox Width="320"
+                             Margin="0,0,10,0"
+                             VerticalContentAlignment="Center"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="Buscar" Width="90" Command="{Binding SearchCommand}"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Tabla -->
+        <!-- Tabla + Detalle -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="320"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Tabla -->
+            <Grid Grid.Column="0">
+                <DataGrid ItemsSource="{Binding Items}"
+                  SelectedItem="{Binding SelectedItem}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  RowHeight="30">
+
+                    <!-- Resaltado stock bajo -->
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Stock}" Value="0">
+                                    <Setter Property="Background" Value="#FFFFD6D6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Stock}" Value="1">
+                                    <Setter Property="Background" Value="#FFFFD6D6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Stock}" Value="2">
+                                    <Setter Property="Background" Value="#FFFFD6D6"/>
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding Stock}" Value="3">
+                                    <Setter Property="Background" Value="#FFFFF4C8"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Stock}" Value="4">
+                                    <Setter Property="Background" Value="#FFFFF4C8"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Stock}" Value="5">
+                                    <Setter Property="Background" Value="#FFFFF4C8"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="3*"/>
+                        <DataGridTextColumn Header="Categoría" Binding="{Binding Category}" Width="1.2*"/>
+                        <DataGridTextColumn Header="Modelo" Binding="{Binding PhoneModel}" Width="1.5*"/>
+                        <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="0.8*"/>
+                        <DataGridTextColumn Header="Precio" Binding="{Binding Price, StringFormat={}{0:C}}" Width="1*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Loading overlay -->
+                <Border Background="#80FFFFFF"
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="Cargando..."
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+
+            <!-- Panel detalle -->
+            <Border Grid.Column="1"
+            Margin="12,0,0,0"
+            Padding="12"
+            CornerRadius="10"
+            BorderBrush="#20000000"
+            BorderThickness="1"
+            Background="#0A000000">
+                <StackPanel>
+
+                    <TextBlock Text="Detalle"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,10"/>
+
+                    <TextBlock Text="{Binding DetailTitle}"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,10"/>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Categoría:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DetailCategory}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Modelo:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DetailPhoneModel}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Estado:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DetailActive}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Stock:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DetailStock}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Precio:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DetailPrice, StringFormat={}{0:C}}"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Costo:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding DetailCost, StringFormat={}{0:C}}"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Margen:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DetailMargin, StringFormat={}{0:C}}"/>
+                    </Grid>
+
+                    <TextBlock Text="Último movimiento"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding LastMovementText}"
+                       Opacity="0.9"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,12"/>
+
+                    <!-- Acciones rápidas -->
+                    <TextBlock Text="Acciones rápidas"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,6"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="+1 compra"
+                        Width="140"
+                        Margin="0,0,8,0"
+                        Command="{Binding QuickPurchaseCommand}"/>
+                        <Button Content="-1 venta"
+                        Width="140"
+                        Command="{Binding QuickSaleCommand}"/>
+                    </StackPanel>
+
+                    <!-- Acciones completas reutilizando tus ventanas -->
+                    <Button Content="Registrar movimiento..."
+                    Margin="0,0,0,8"
+                    Click="RegisterMovement_Click"/>
+
+                    <Button Content="Ver historial..."
+                    Click="ViewHistory_Click"/>
+
+                    <!-- Overlay detalle -->
+                    <Border Background="#80FFFFFF"
+                    Visibility="{Binding IsDetailLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Margin="-12,-12,-12,-12"
+                    CornerRadius="10">
+                        <TextBlock Text="Cargando detalle..."
+                           FontSize="14"
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
+                    </Border>
+
+                </StackPanel>
             </Border>
         </Grid>
+
     </Grid>
 </Window>

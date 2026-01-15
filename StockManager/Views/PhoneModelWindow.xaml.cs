@@ -1,14 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Microsoft.Extensions.DependencyInjection;
 using StockManager.Application.Services;
 using StockManager.ViewModels;
@@ -25,21 +16,39 @@ public partial class PhoneModelsWindow : Window
         InitializeComponent();
         _sp = sp;
 
+      
         var q = _sp.GetRequiredService<IPhoneModelQueryService>();
         DataContext = new PhoneModelsViewModel(q);
 
-        Loaded += async (_, __) => await Vm.LoadAsync();
+        Loaded += async (_, __) =>
+        {
+            try
+            {
+                await Vm.LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                UiError.Show(ex, "No se pudieron cargar los modelos");
+            }
+        };
     }
 
     private void New_Click(object sender, RoutedEventArgs e)
     {
-        var cmd = _sp.GetRequiredService<IPhoneModelCommandService>();
-        var vm = new PhoneModelEditorViewModel(cmd, id: null, brand: "", modelName: "");
+        try
+        {
+            var cmd = _sp.GetRequiredService<IPhoneModelCommandService>();
+            var vm = new PhoneModelEditorViewModel(cmd, id: null, brand: "", modelName: "");
 
-        var win = new PhoneModelEditorWindow(vm) { Owner = this };
-        var ok = win.ShowDialog();
-        if (ok == true)
-            _ = Vm.LoadAsync();
+            var win = new PhoneModelEditorWindow(vm) { Owner = this };
+            var ok = win.ShowDialog();
+            if (ok == true)
+                _ = SafeReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            UiError.Show(ex, "No se pudo abrir el alta de modelo");
+        }
     }
 
     private void Edit_Click(object sender, RoutedEventArgs e)
@@ -51,16 +60,36 @@ public partial class PhoneModelsWindow : Window
             return;
         }
 
-        var cmd = _sp.GetRequiredService<IPhoneModelCommandService>();
-        var vm = new PhoneModelEditorViewModel(cmd,
-            id: Vm.SelectedItem.Id,
-            brand: Vm.SelectedItem.Brand,
-            modelName: Vm.SelectedItem.ModelName);
+        try
+        {
+            var cmd = _sp.GetRequiredService<IPhoneModelCommandService>();
+            var vm = new PhoneModelEditorViewModel(
+                cmd,
+                id: Vm.SelectedItem.Id,
+                brand: Vm.SelectedItem.Brand,
+                modelName: Vm.SelectedItem.ModelName
+            );
 
-        var win = new PhoneModelEditorWindow(vm) { Owner = this };
-        var ok = win.ShowDialog();
-        if (ok == true)
-            _ = Vm.LoadAsync();
+            var win = new PhoneModelEditorWindow(vm) { Owner = this };
+            var ok = win.ShowDialog();
+            if (ok == true)
+                _ = SafeReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            UiError.Show(ex, "No se pudo abrir la edición de modelo");
+        }
+    }
+
+    private async Task SafeReloadAsync()
+    {
+        try
+        {
+            await Vm.LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            UiError.Show(ex, "No se pudieron recargar los modelos");
+        }
     }
 }
-

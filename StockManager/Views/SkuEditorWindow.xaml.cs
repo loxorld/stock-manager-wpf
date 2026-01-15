@@ -1,17 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using StockManager.Domain.Enums;
 using StockManager.ViewModels;
-
 
 namespace StockManager.Views;
 
@@ -24,7 +13,20 @@ public partial class SkuEditorWindow : Window
         InitializeComponent();
         DataContext = vm;
 
-        Loaded += async (_, __) => await Vm.InitializeAsync();
+        Loaded += async (_, __) =>
+        {
+            try
+            {
+                await Vm.InitializeAsync();
+
+                if (!string.IsNullOrWhiteSpace(Vm.ErrorMessage))
+                    UiError.Show(new InvalidOperationException(Vm.ErrorMessage), "Atención");
+            }
+            catch (Exception ex)
+            {
+                UiError.Show(ex, "Error inesperado");
+            }
+        };
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -35,12 +37,22 @@ public partial class SkuEditorWindow : Window
 
     private async void Save_Click(object sender, RoutedEventArgs e)
     {
-        await Vm.SaveAsync();
-        if (string.IsNullOrWhiteSpace(Vm.ErrorMessage))
+        try
         {
+            await Vm.SaveAsync();
+
+            if (!string.IsNullOrWhiteSpace(Vm.ErrorMessage))
+            {
+                UiError.Show(new InvalidOperationException(Vm.ErrorMessage), "No se pudo guardar el SKU");
+                return;
+            }
+
             DialogResult = true;
             Close();
         }
+        catch (Exception ex)
+        {
+            UiError.Show(ex, "Error inesperado");
+        }
     }
 }
-
