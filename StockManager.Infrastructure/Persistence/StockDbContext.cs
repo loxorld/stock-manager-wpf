@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StockManager.Domain.Entities;
 using StockManager.Domain.Enums;
 
@@ -11,9 +8,7 @@ public class StockDbContext : DbContext
 {
     public DbSet<PhoneModel> PhoneModels => Set<PhoneModel>();
     public DbSet<Sku> Skus => Set<Sku>();
-
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
-
 
     public StockDbContext(DbContextOptions<StockDbContext> options) : base(options) { }
 
@@ -26,8 +21,13 @@ public class StockDbContext : DbContext
         {
             e.ToTable("phone_models");
             e.HasKey(x => x.Id);
+
             e.Property(x => x.Brand).IsRequired().HasMaxLength(80);
             e.Property(x => x.ModelName).IsRequired().HasMaxLength(80);
+
+            // ✅ Active
+            e.Property(x => x.Active).IsRequired();
+
             e.HasIndex(x => new { x.Brand, x.ModelName }).IsUnique();
         });
 
@@ -48,14 +48,13 @@ public class StockDbContext : DbContext
              .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // Seed inicial 
+        // Seed inicial
         modelBuilder.Entity<PhoneModel>().HasData(
-            new PhoneModel { Id = 1, Brand = "Samsung", ModelName = "A02" },
-            new PhoneModel { Id = 2, Brand = "Samsung", ModelName = "A20" }
+            new PhoneModel { Id = 1, Brand = "Samsung", ModelName = "A02", Active = true },
+            new PhoneModel { Id = 2, Brand = "Samsung", ModelName = "A20", Active = true }
         );
 
         modelBuilder.Entity<Sku>().HasData(
-            // Fundas (modelo + tipo de funda)
             new Sku
             {
                 Id = 1,
@@ -82,8 +81,6 @@ public class StockDbContext : DbContext
                 Price = 2800m,
                 Active = true
             },
-
-            // Templados (modelo + tipo de templado)
             new Sku
             {
                 Id = 3,
@@ -110,8 +107,6 @@ public class StockDbContext : DbContext
                 Price = 3500m,
                 Active = true
             },
-
-            // Accesorios (sin modelo)
             new Sku
             {
                 Id = 5,
@@ -142,8 +137,5 @@ public class StockDbContext : DbContext
             e.HasIndex(x => x.SkuId);
             e.HasIndex(x => x.CreatedAt);
         });
-
-
-
     }
 }

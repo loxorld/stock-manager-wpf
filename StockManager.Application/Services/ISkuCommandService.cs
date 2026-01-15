@@ -9,5 +9,6 @@ public interface ISkuCommandService
 {
     Task<int> CreateAsync(UpsertSkuRequest request);
     Task UpdateAsync(UpsertSkuRequest request);
+    Task DeleteAsync(int id);
 }
 

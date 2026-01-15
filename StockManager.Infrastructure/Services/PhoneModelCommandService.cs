@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StockManager.Application.Dtos;
 using StockManager.Application.Services;
 using StockManager.Domain.Entities;
@@ -22,17 +19,29 @@ public class PhoneModelCommandService : IPhoneModelCommandService
     {
         Validate(r);
 
-        // Evitar duplicados (Brand + ModelName)
-        var exists = await _db.PhoneModels
-            .AnyAsync(x => x.Brand == r.Brand.Trim() && x.ModelName == r.ModelName.Trim());
+        var brand = r.Brand.Trim();
+        var model = r.ModelName.Trim();
 
-        if (exists)
-            throw new InvalidOperationException("Ese modelo ya existe.");
+        // ✅ Si existe (activo o inactivo), no duplicamos (por el índice único).
+        // Si está inactivo, lo reactivamos.
+        var existing = await _db.PhoneModels
+            .FirstOrDefaultAsync(x => x.Brand == brand && x.ModelName == model);
+
+        if (existing != null)
+        {
+            if (existing.Active)
+                throw new InvalidOperationException("Ese modelo ya existe.");
+
+            existing.Active = true;
+            await _db.SaveChangesAsync();
+            return existing.Id;
+        }
 
         var entity = new PhoneModel
         {
-            Brand = r.Brand.Trim(),
-            ModelName = r.ModelName.Trim()
+            Brand = brand,
+            ModelName = model,
+            Active = true
         };
 
         _db.PhoneModels.Add(entity);
@@ -51,6 +60,8 @@ public class PhoneModelCommandService : IPhoneModelCommandService
         var brand = r.Brand.Trim();
         var model = r.ModelName.Trim();
 
+        // ✅ No permitir duplicado con otro registro (aunque esté inactivo),
+        
         var exists = await _db.PhoneModels
             .AnyAsync(x => x.Id != entity.Id && x.Brand == brand && x.ModelName == model);
 
@@ -63,6 +74,20 @@ public class PhoneModelCommandService : IPhoneModelCommandService
         await _db.SaveChangesAsync();
     }
 
+    public async Task DeleteAsync(int id)
+    {
+        var entity = await _db.PhoneModels.FirstOrDefaultAsync(x => x.Id == id);
+        if (entity == null)
+            throw new InvalidOperationException("Modelo inexistente.");
+
+        // ✅ Eliminación lógica: aunque tenga SKUs asociados, no rompe nada.
+        if (!entity.Active)
+            return; // idempotente
+
+        entity.Active = false;
+        await _db.SaveChangesAsync();
+    }
+
     private static void Validate(UpsertPhoneModelRequest r)
     {
         if (string.IsNullOrWhiteSpace(r.Brand))
@@ -72,4 +97,3 @@ public class PhoneModelCommandService : IPhoneModelCommandService
             throw new ArgumentException("El nombre del modelo es obligatorio.");
     }
 }
-

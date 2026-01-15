@@ -1,11 +1,28 @@
 ﻿<Application x:Class="StockManager.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:conv="clr-namespace:StockManager.Converters">
+             xmlns:conv="clr-namespace:StockManager.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <Application.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <conv:BooleanToOpacityConverter x:Key="BooleanToOpacityConverter"/>
-        
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Tema + colores (v5+) -->
+                <materialDesign:BundledTheme BaseTheme="Light"
+                                             PrimaryColor="Blue"
+                                             SecondaryColor="Cyan" />
+
+                <!-- Defaults: elegí 2 (clásico) o 3 (más moderno) -->
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+                <!-- Si querés Material 3, cambiá la línea de arriba por esta:
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+                -->
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Lo tuyo, intacto -->
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <conv:BooleanToOpacityConverter x:Key="BooleanToOpacityConverter"/>
+
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
-

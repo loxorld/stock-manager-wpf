@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StockManager.Application.Dtos;
 using StockManager.Application.Services;
@@ -12,12 +9,33 @@ namespace StockManager.ViewModels;
 public partial class PhoneModelsViewModel : ObservableObject
 {
     private readonly IPhoneModelQueryService _query;
+    private readonly Debouncer _debouncer = new();
 
     public ObservableCollection<PhoneModelListItemDto> Items { get; } = new();
 
-    [ObservableProperty] private PhoneModelListItemDto? selectedItem;
-    [ObservableProperty] private string searchText = "";
-    [ObservableProperty] private bool isLoading;
+    [ObservableProperty]
+    private PhoneModelListItemDto? selectedItem;
+
+    partial void OnSelectedItemChanged(PhoneModelListItemDto? value)
+        => OnPropertyChanged(nameof(HasSelection));
+
+    public bool HasSelection => SelectedItem != null;
+
+    private string searchText = "";
+    public string SearchText
+    {
+        get => searchText;
+        set
+        {
+            if (SetProperty(ref searchText, value))
+            {
+                _debouncer.Debounce(300, LoadAsync);
+            }
+        }
+    }
+
+    [ObservableProperty]
+    private bool isLoading;
 
     public PhoneModelsViewModel(IPhoneModelQueryService query)
     {
@@ -27,12 +45,16 @@ public partial class PhoneModelsViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
+        if (IsLoading) return;
+
         IsLoading = true;
         try
         {
-            var data = await _query.GetAllForAdminAsync(SearchText);
+            var data = await _query.GetAllForAdminAsync(SearchText?.Trim());
+
             Items.Clear();
-            foreach (var x in data) Items.Add(x);
+            foreach (var x in data)
+                Items.Add(x);
         }
         finally
         {

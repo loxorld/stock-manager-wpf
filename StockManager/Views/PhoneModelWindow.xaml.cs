@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using StockManager.Application.Services;
@@ -16,7 +17,6 @@ public partial class PhoneModelsWindow : Window
         InitializeComponent();
         _sp = sp;
 
-      
         var q = _sp.GetRequiredService<IPhoneModelQueryService>();
         DataContext = new PhoneModelsViewModel(q);
 
@@ -78,6 +78,40 @@ public partial class PhoneModelsWindow : Window
         catch (Exception ex)
         {
             UiError.Show(ex, "No se pudo abrir la edición de modelo");
+        }
+    }
+
+    private async void Delete_Click(object sender, RoutedEventArgs e)
+    {
+        if (Vm.SelectedItem == null)
+        {
+            MessageBox.Show("Seleccioná un modelo primero.", "Atención",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var it = Vm.SelectedItem;
+
+        var confirm = MessageBox.Show(
+            $"¿Eliminar el modelo?\n\n{it.Brand} {it.ModelName}\n\n" +
+            "Si hay SKUs asociados, no se podrá eliminar.",
+            "Confirmar eliminación",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning
+        );
+
+        if (confirm != MessageBoxResult.Yes)
+            return;
+
+        try
+        {
+            var cmd = _sp.GetRequiredService<IPhoneModelCommandService>();
+            await cmd.DeleteAsync(it.Id);
+            await SafeReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            UiError.Show(ex, "No se pudo eliminar el modelo");
         }
     }
 

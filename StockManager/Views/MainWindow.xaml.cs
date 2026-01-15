@@ -138,4 +138,40 @@ public partial class MainWindow : Window
         win.ShowDialog();
     }
 
+    private async void DeleteSku_Click(object sender, RoutedEventArgs e)
+    {
+        if (_vm.SelectedItem == null)
+        {
+            MessageBox.Show("Seleccioná un SKU primero.", "Atención",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var it = _vm.SelectedItem;
+
+        var confirm = MessageBox.Show(
+            $"¿Eliminar el SKU?\n\n{it.Name}\n\n" +
+            "Solo se puede eliminar si el stock es 0.",
+            "Confirmar eliminación",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning
+        );
+
+        if (confirm != MessageBoxResult.Yes)
+            return;
+
+        try
+        {
+            var cmd = _sp.GetRequiredService<ISkuCommandService>();
+            await cmd.DeleteAsync(it.Id);
+            await _vm.LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            UiError.Show(ex, "No se pudo eliminar el SKU");
+        }
+    }
+
+
+
 }

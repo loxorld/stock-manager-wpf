@@ -2,19 +2,17 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:StockManager.Views"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Stock Manager"
-        Height="520" Width="980"
-        WindowStartupLocation="CenterScreen">
+        Height="540" Width="1040"
+        WindowStartupLocation="CenterScreen"
+        FontSize="13"
+        xmlns:materialDesignThemes="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <!-- Atajos -->
     <Window.InputBindings>
-        <!-- Enter = buscar -->
         <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
-
-        <!-- Ctrl+N = nuevo SKU -->
         <KeyBinding Modifiers="Control" Key="N" Command="{x:Static local:MainWindow.NewSkuCmd}" />
-
-        <!-- Ctrl+M = movimiento -->
         <KeyBinding Modifiers="Control" Key="M" Command="{x:Static local:MainWindow.MovementCmd}" />
     </Window.InputBindings>
 
@@ -23,168 +21,245 @@
         <CommandBinding Command="{x:Static local:MainWindow.MovementCmd}" Executed="Movement_Executed"/>
     </Window.CommandBindings>
 
-    <Grid Margin="14">
+    <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="True">
-            <TextBlock Text="Stock"
-                       FontSize="22"
-                       FontWeight="SemiBold"
-                       VerticalAlignment="Center"
-                       DockPanel.Dock="Left"/>
-
-            <!-- Acciones -->
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                <Button Content="Modelos" Width="100" Margin="0,0,8,0" Click="PhoneModels_Click"/>
-                <Button Content="Nuevo SKU" Width="110" Margin="0,0,8,0" Click="NewSku_Click"/>
-                <Button Content="Editar SKU" Width="110" Margin="0,0,8,0" Click="EditSku_Click"/>
-                <Button Content="Dashboard" Width="110" Margin="0,0,8,0" Click="Dashboard_Click"/>
-                <Separator Width="10" Opacity="0"/>
-                <Button Content="Registrar movimiento" Width="170" Margin="0,0,8,0" Click="RegisterMovement_Click"/>
-                <Button Content="Ver historial" Width="110" Margin="0,0,0,0" Click="ViewHistory_Click"/>
+        <!-- Top bar -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="True">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                <materialDesign:PackIcon Kind="PackageVariantClosed" Width="22" Height="22" Margin="0,0,10,0" Opacity="0.9"/>
+                <TextBlock Text="Stock" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
             </StackPanel>
+
+            <!-- Actions -->
+            <ToolBar DockPanel.Dock="Right"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Padding="0"
+                     Margin="0">
+                <Button Click="PhoneModels_Click"
+                        ToolTip="Modelos de celular"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="CellphoneCog" Width="18" Height="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Modelos"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Click="Dashboard_Click"
+                        ToolTip="Dashboard"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ChartTimelineVariant" Width="18" Height="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Dashboard"/>
+                    </StackPanel>
+                </Button>
+
+                <Separator Width="12" Opacity="0"/>
+
+                <!-- FIX: Cambiar a MaterialDesignRaisedButton para evitar XDG0010 -->
+                <Button Click="NewSku_Click"
+                        ToolTip="Nuevo SKU (Ctrl+N)"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Nuevo SKU"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Click="EditSku_Click"
+                        ToolTip="Editar SKU"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Pencil" Width="18" Height="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Editar"/>
+                    </StackPanel>
+                </Button>
+
+                <Separator Width="12" Opacity="0"/>
+
+                <Button Click="RegisterMovement_Click"
+                        ToolTip="Registrar movimiento (Ctrl+M)"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="SwapVertical" Width="18" Height="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Movimiento"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Click="ViewHistory_Click"
+                        ToolTip="Ver historial"
+                        Style="{StaticResource MaterialDesignOutlinedButton}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="History" Width="18" Height="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Historial"/>
+                    </StackPanel>
+                </Button>
+                <Button Margin="0,8,0,0"
+        Click="DeleteSku_Click"
+        Style="{StaticResource MaterialDesignOutlinedButton}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="DeleteOutline"
+                                 Width="18"
+                                 Height="18"
+                                 Margin="0,0,8,0"
+                                 Foreground="#C62828"/>
+                        <TextBlock Text="Eliminar SKU"
+                   Foreground="#C62828"/>
+                    </StackPanel>
+                </Button>
+            </ToolBar>
         </DockPanel>
 
-        <!-- Filtros -->
-        <Border Grid.Row="1"
-                Background="#0A000000"
-                BorderBrush="#20000000"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="10"
-                Margin="0,0,0,12">
+        <!-- Filters card -->
+        <materialDesign:Card Grid.Row="1" Padding="12" Margin="0,0,0,12">
             <DockPanel LastChildFill="True">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                <!-- Left filters -->
+                <WrapPanel DockPanel.Dock="Left" VerticalAlignment="Center">
 
-                    <TextBlock Text="Categoría:" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <ComboBox Width="170"
-                              Margin="0,0,14,0"
+                    <ComboBox Width="190" Margin="0,0,12,0"
                               ItemsSource="{Binding CategoryOptions}"
                               SelectedItem="{Binding SelectedCategoryOption}"
-                              DisplayMemberPath="Display"/>
+                              DisplayMemberPath="Display"
+                              materialDesign:HintAssist.Hint="Categoría"/>
 
-                    <TextBlock Text="Estado:" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <ComboBox Width="130"
-                              Margin="0,0,14,0"
+                    <ComboBox Width="150" Margin="0,0,12,0"
                               ItemsSource="{Binding ActiveOptions}"
-                              SelectedItem="{Binding SelectedActive}"/>
+                              SelectedItem="{Binding SelectedActive}"
+                              materialDesign:HintAssist.Hint="Estado"/>
 
-                    <CheckBox Content="Stock bajo"
+                    <CheckBox Content="Stock bajo" Margin="0,0,10,0"
                               VerticalAlignment="Center"
-                              Margin="0,0,6,0"
                               IsChecked="{Binding StockLowOnly}"/>
 
-                    <TextBlock Text="≤" VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.75"/>
-                    <TextBox Width="48"
+                    <TextBox Width="80" Margin="0,0,0,0"
                              VerticalContentAlignment="Center"
-                             Text="{Binding StockLowThreshold, UpdateSourceTrigger=PropertyChanged}"/>
+                             Text="{Binding StockLowThreshold, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="≤ umbral"/>
+                </WrapPanel>
 
-                </StackPanel>
-
-                <!-- Búsqueda -->
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
-                    <TextBox Width="320"
-                             Margin="0,0,10,0"
+                <!-- Search -->
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBox Width="340" Margin="0,0,10,0"
                              VerticalContentAlignment="Center"
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button Content="Buscar" Width="90" Command="{Binding SearchCommand}"/>
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Buscar por nombre / modelo..."
+                             materialDesign:TextFieldAssist.PrefixText=""/>
+                    <!-- FIX: Cambiar a MaterialDesignRaisedButton para evitar XDG0010 -->
+                    <Button Width="110"
+                            Command="{Binding SearchCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Magnify" Width="18" Height="18" Margin="0,0,8,0"/>
+                            <TextBlock Text="Buscar"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </DockPanel>
-        </Border>
+        </materialDesign:Card>
 
-        <!-- Tabla -->
-        <!-- Tabla + Detalle -->
+        <!-- Content -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="340"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Tabla -->
-            <Grid Grid.Column="0">
-                <DataGrid ItemsSource="{Binding Items}"
-                  SelectedItem="{Binding SelectedItem}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  CanUserAddRows="False"
-                  HeadersVisibility="Column"
-                  GridLinesVisibility="Horizontal"
-                  RowHeight="30">
+            <!-- Grid -->
+            <materialDesign:Card Grid.Column="0" Padding="0">
+                <Grid>
+                    <DataGrid ItemsSource="{Binding Items}"
+                              SelectedItem="{Binding SelectedItem}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="None"
+                              RowHeight="34"
+                              Margin="0">
 
-                    <!-- Resaltado stock bajo -->
-                    <DataGrid.RowStyle>
-                        <Style TargetType="DataGridRow">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Stock}" Value="0">
-                                    <Setter Property="Background" Value="#FFFFD6D6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Stock}" Value="1">
-                                    <Setter Property="Background" Value="#FFFFD6D6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Stock}" Value="2">
-                                    <Setter Property="Background" Value="#FFFFD6D6"/>
-                                </DataTrigger>
+                        <!-- Resaltado stock bajo -->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Style.Triggers>
+                                    <!-- Rojo crítico 0-2 -->
+                                    <DataTrigger Binding="{Binding Stock}" Value="0">
+                                        <Setter Property="Background" Value="#FFFFD6D6"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Stock}" Value="1">
+                                        <Setter Property="Background" Value="#FFFFD6D6"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Stock}" Value="2">
+                                        <Setter Property="Background" Value="#FFFFD6D6"/>
+                                    </DataTrigger>
 
-                                <DataTrigger Binding="{Binding Stock}" Value="3">
-                                    <Setter Property="Background" Value="#FFFFF4C8"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Stock}" Value="4">
-                                    <Setter Property="Background" Value="#FFFFF4C8"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Stock}" Value="5">
-                                    <Setter Property="Background" Value="#FFFFF4C8"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.RowStyle>
+                                    <!-- Amarillo bajo 3-5 -->
+                                    <DataTrigger Binding="{Binding Stock}" Value="3">
+                                        <Setter Property="Background" Value="#FFFFF4C8"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Stock}" Value="4">
+                                        <Setter Property="Background" Value="#FFFFF4C8"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Stock}" Value="5">
+                                        <Setter Property="Background" Value="#FFFFF4C8"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
 
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="3*"/>
-                        <DataGridTextColumn Header="Categoría" Binding="{Binding Category}" Width="1.2*"/>
-                        <DataGridTextColumn Header="Modelo" Binding="{Binding PhoneModel}" Width="1.5*"/>
-                        <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="0.8*"/>
-                        <DataGridTextColumn Header="Precio" Binding="{Binding Price, StringFormat={}{0:C}}" Width="1*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="3*"/>
+                            <DataGridTextColumn Header="Categoría" Binding="{Binding Category}" Width="1.1*"/>
+                            <DataGridTextColumn Header="Modelo" Binding="{Binding PhoneModel}" Width="1.4*"/>
+                            <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="0.7*"/>
+                            <DataGridTextColumn Header="Precio" Binding="{Binding Price, StringFormat={}{0:C}}" Width="0.9*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-                <!-- Loading overlay -->
-                <Border Background="#80FFFFFF"
-                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock Text="Cargando..."
-                       FontSize="18"
-                       FontWeight="SemiBold"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"/>
-                </Border>
-            </Grid>
+                    <!-- Loading overlay -->
+                    <Grid Background="#55FFFFFF"
+                          Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <materialDesign:Card Padding="18"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <ProgressBar Width="140" Height="6" IsIndeterminate="True"/>
+                                <TextBlock Text="  Cargando..." VerticalAlignment="Center" Margin="12,0,0,0"/>
+                            </StackPanel>
+                        </materialDesign:Card>
+                    </Grid>
+                </Grid>
+            </materialDesign:Card>
 
-            <!-- Panel detalle -->
-            <Border Grid.Column="1"
-            Margin="12,0,0,0"
-            Padding="12"
-            CornerRadius="10"
-            BorderBrush="#20000000"
-            BorderThickness="1"
-            Background="#0A000000">
-                <StackPanel>
+            <!-- Detail -->
+            <materialDesign:Card Grid.Column="1" Margin="12,0,0,0" Padding="14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <TextBlock Text="Detalle"
-                       FontSize="16"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,10"/>
+                    <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                        <TextBlock Text="Detalle" FontSize="16" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding DetailTitle}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,8,0,0"/>
+                    </StackPanel>
 
-                    <TextBlock Text="{Binding DetailTitle}"
-                       FontSize="14"
-                       FontWeight="SemiBold"
-                       TextWrapping="Wrap"
-                       Margin="0,0,0,10"/>
-
-                    <Grid Margin="0,0,0,10">
+                    <Grid Grid.Row="1" Margin="0,0,0,10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -195,78 +270,103 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Categoría:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Categoría" Opacity="0.7"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DetailCategory}"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Modelo:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Modelo" Opacity="0.7"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DetailPhoneModel}" TextWrapping="Wrap"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Estado:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Estado" Opacity="0.7"/>
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DetailActive}"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Stock:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Stock" Opacity="0.7"/>
                         <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DetailStock}"/>
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Precio:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Precio" Opacity="0.7"/>
                         <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DetailPrice, StringFormat={}{0:C}}"/>
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Costo:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Costo" Opacity="0.7"/>
                         <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding DetailCost, StringFormat={}{0:C}}"/>
 
-                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Margen:" Opacity="0.75"/>
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Margen" Opacity="0.7"/>
                         <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding DetailMargin, StringFormat={}{0:C}}"/>
                     </Grid>
 
-                    <TextBlock Text="Último movimiento"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding LastMovementText}"
-                       Opacity="0.9"
-                       TextWrapping="Wrap"
-                       Margin="0,0,0,12"/>
-
-                    <!-- Acciones rápidas -->
-                    <TextBlock Text="Acciones rápidas"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,6"/>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Content="+1 compra"
-                        Width="140"
-                        Margin="0,0,8,0"
-                        Command="{Binding QuickPurchaseCommand}"/>
-                        <Button Content="-1 venta"
-                        Width="140"
-                        Command="{Binding QuickSaleCommand}"/>
+                    <StackPanel Grid.Row="2" Margin="0,0,0,12">
+                        <TextBlock Text="Último movimiento" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding LastMovementText}"
+                                   Opacity="0.9"
+                                   TextWrapping="Wrap"
+                                   Margin="0,4,0,0"/>
                     </StackPanel>
 
-                    <!-- Acciones completas reutilizando tus ventanas -->
-                    <Button Content="Registrar movimiento..."
-                    Margin="0,0,0,8"
-                    Click="RegisterMovement_Click"/>
+                    <StackPanel Grid.Row="3">
+                        <TextBlock Text="Acciones rápidas" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
-                    <Button Content="Ver historial..."
-                    Click="ViewHistory_Click"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button Width="150" Margin="0,0,10,0"
+                                    Command="{Binding QuickPurchaseCommand}"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="CartPlus" Width="18" Height="18" Margin="0,0,8,0"/>
+                                    <TextBlock Text="+1 compra"/>
+                                </StackPanel>
+                            </Button>
+                               
+                            
+                            
+                            <Button Width="150"
+                                    Command="{Binding QuickSaleCommand}"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="CartMinus" Width="18" Height="18" Margin="0,0,8,0"/>
+                                    <TextBlock Text="-1 venta"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            
+                        </StackPanel>
 
-                    <!-- Overlay detalle -->
-                    <Border Background="#80FFFFFF"
-                    Visibility="{Binding IsDetailLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Margin="-12,-12,-12,-12"
-                    CornerRadius="10">
-                        <TextBlock Text="Cargando detalle..."
-                           FontSize="14"
-                           FontWeight="SemiBold"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-                    </Border>
+                        <!-- FIX: Cambiar a MaterialDesignRaisedButton para evitar XDG0010 -->
+                        <Button Margin="0,0,0,8"
+                                Click="RegisterMovement_Click"
+                                Style="{StaticResource MaterialDesignRaisedButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="SwapVertical" Width="18" Height="18" Margin="0,0,8,0"/>
+                                <TextBlock Text="Registrar movimiento..."/>
+                            </StackPanel>
+                        </Button>
 
-                </StackPanel>
-            </Border>
+                        <Button Click="ViewHistory_Click"
+                                Style="{StaticResource MaterialDesignOutlinedButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="History" Width="18" Height="18" Margin="0,0,8,0"/>
+                                <TextBlock Text="Ver historial..."/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Overlay detalle -->
+                        <Grid Background="#55FFFFFF"
+                              Visibility="{Binding IsDetailLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                              Margin="-14,-14,-14,-14">
+                            <materialDesign:Card Padding="14"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <ProgressBar Width="120" Height="6" IsIndeterminate="True"/>
+                                    <TextBlock Text="  Cargando detalle..." VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </Grid>
+
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
+
         </Grid>
-
     </Grid>
 </Window>

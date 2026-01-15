@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StockManager.Application.Dtos;
 using StockManager.Application.Services;
 using StockManager.Infrastructure.Persistence;
@@ -17,10 +14,12 @@ public class PhoneModelQueryService : IPhoneModelQueryService
         _db = db;
     }
 
+    // ✅ Para combos (SKU editor): SOLO activos
     public async Task<List<PhoneModelDto>> GetAllAsync()
     {
         return await _db.PhoneModels
             .AsNoTracking()
+            .Where(x => x.Active)
             .OrderBy(x => x.Brand).ThenBy(x => x.ModelName)
             .Select(x => new PhoneModelDto
             {
@@ -30,14 +29,22 @@ public class PhoneModelQueryService : IPhoneModelQueryService
             .ToListAsync();
     }
 
+    // ✅ Para admin : por UX también mostramos SOLO activos
+    // (así cuando "eliminás" desaparece de la lista).
     public async Task<List<PhoneModelListItemDto>> GetAllForAdminAsync(string? search = null)
     {
-        var q = _db.PhoneModels.AsNoTracking();
+        var q = _db.PhoneModels
+            .AsNoTracking()
+            .Where(x => x.Active);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var s = search.Trim();
-            q = q.Where(x => x.Brand.Contains(s) || x.ModelName.Contains(s));
+            var s = search.Trim().ToLower();
+
+            // ✅ Case-insensitive (evita el problema de "a" vs "A")
+            q = q.Where(x =>
+                x.Brand.ToLower().Contains(s) ||
+                x.ModelName.ToLower().Contains(s));
         }
 
         return await q

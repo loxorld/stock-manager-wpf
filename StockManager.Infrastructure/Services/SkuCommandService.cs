@@ -88,4 +88,21 @@ public class SkuCommandService : ISkuCommandService
         if (r.Category == ProductCategory.ScreenProtector && r.ProtectorType is null)
             throw new ArgumentException("El tipo de templado es obligatorio.");
     }
+
+    public async Task DeleteAsync(int id)
+    {
+        var sku = await _db.Skus.FirstOrDefaultAsync(x => x.Id == id);
+        if (sku == null)
+            throw new InvalidOperationException("SKU inexistente.");
+
+        if (sku.Stock != 0)
+            throw new InvalidOperationException(
+                "No se puede eliminar un SKU con stock distinto de 0."
+            );
+
+        _db.Skus.Remove(sku);
+        await _db.SaveChangesAsync();
+    }
+
+
 }
