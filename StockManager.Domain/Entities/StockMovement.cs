@@ -12,6 +12,8 @@ public class StockMovement
 
     public StockMovementType Type { get; set; }
 
+    public PaymentMethod? PaymentMethod { get; set; }
+
     // Cantidad firmada: + entra, - sale
     public int SignedQuantity { get; set; }
 

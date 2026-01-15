@@ -233,6 +233,7 @@ public partial class StockViewModel : ObservableObject
                 SkuId = SelectedItem.Id,
                 Type = StockMovementType.Sale,
                 Quantity = 1,
+                PaymentMethod = PaymentMethod.Cash,
                 Note = "Venta rápida (-1)"
             });
 

@@ -12,6 +12,7 @@ public class RegisterMovementRequest
     public int Quantity { get; set; } // positivo
 
     public int? SignedQuantity { get; set; } // solo para Adjustment
+    public PaymentMethod? PaymentMethod { get; set; }
     public string? Note { get; set; }
 }
 

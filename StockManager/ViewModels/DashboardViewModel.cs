@@ -27,6 +27,8 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private DashboardPeriod selectedPeriod = DashboardPeriod.Today;
 
     [ObservableProperty] private decimal revenue;
+    [ObservableProperty] private decimal cashRevenue;
+    [ObservableProperty] private decimal cardRevenue;
     [ObservableProperty] private int unitsSold;
     [ObservableProperty] private int salesCount;
     [ObservableProperty] private DateTime? fromDate;
@@ -67,6 +69,8 @@ public partial class DashboardViewModel : ObservableObject
 
             var summary = await _dashboard.GetSummaryAsync(fromUtc, toUtc);
             Revenue = summary.Revenue;
+            CashRevenue = summary.CashRevenue;
+            CardRevenue = summary.CardRevenue;
             UnitsSold = summary.UnitsSold;
             SalesCount = summary.SalesCount;
 

@@ -23,6 +23,9 @@ public partial class RegisterMovementViewModel : ObservableObject
     [ObservableProperty]
     private StockMovementType type = StockMovementType.Sale;
 
+    [ObservableProperty]
+    private bool isSale = true;
+
     // Opciones para el ComboBox (texto lindo + valor real)
     public IReadOnlyList<MovementTypeOption> MovementTypeOptions { get; } =
         new List<MovementTypeOption>
@@ -31,6 +34,13 @@ public partial class RegisterMovementViewModel : ObservableObject
             new(StockMovementType.PurchaseEntry, "Compra"),
             new(StockMovementType.Adjustment, "Ajuste de stock (+ / -)"),
             new(StockMovementType.Shrinkage, "Pérdida / merma")
+        };
+
+    public IReadOnlyList<PaymentMethodOption> PaymentMethodOptions { get; } =
+        new List<PaymentMethodOption>
+        {
+            new(PaymentMethod.Cash, "Efectivo"),
+            new(PaymentMethod.MercadoPago, "MercadoPago / Tarjeta")
         };
 
     // Lo que selecciona el ComboBox
@@ -46,6 +56,13 @@ public partial class RegisterMovementViewModel : ObservableObject
                 Type = value.Value;
             }
         }
+    }
+
+    private PaymentMethodOption selectedPaymentMethodOption = null!;
+    public PaymentMethodOption SelectedPaymentMethodOption
+    {
+        get => selectedPaymentMethodOption;
+        set => SetProperty(ref selectedPaymentMethodOption, value);
     }
 
     // string para permitir "-" en ajuste
@@ -66,6 +83,7 @@ public partial class RegisterMovementViewModel : ObservableObject
 
         // Default: Venta
         SelectedTypeOption = MovementTypeOptions.First(x => x.Value == Type);
+        SelectedPaymentMethodOption = PaymentMethodOptions.First(x => x.Value == PaymentMethod.Cash);
     }
 
     // Si Type cambia por algún motivo, mantenemos sincronizado el combo.
@@ -75,6 +93,7 @@ public partial class RegisterMovementViewModel : ObservableObject
         if (opt != null && !ReferenceEquals(opt, SelectedTypeOption))
             selectedTypeOption = opt; // set directo para evitar loop
         OnPropertyChanged(nameof(SelectedTypeOption));
+        IsSale = value == StockMovementType.Sale;
     }
 
     [RelayCommand]
@@ -125,7 +144,10 @@ public partial class RegisterMovementViewModel : ObservableObject
             {
                 SkuId = SkuId,
                 Type = Type,
-                Note = string.IsNullOrWhiteSpace(Note) ? null : Note.Trim()
+                Note = string.IsNullOrWhiteSpace(Note) ? null : Note.Trim(),
+                PaymentMethod = Type == StockMovementType.Sale
+                    ? SelectedPaymentMethodOption?.Value
+                    : null
             };
 
             if (Type == StockMovementType.Adjustment)

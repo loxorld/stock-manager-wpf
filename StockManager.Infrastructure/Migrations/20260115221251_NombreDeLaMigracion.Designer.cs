@@ -11,8 +11,8 @@ using StockManager.Infrastructure.Persistence;
 namespace StockManager.Infrastructure.Migrations
 {
     [DbContext(typeof(StockDbContext))]
-    [Migration("20260115202943_InitClean")]
-    partial class InitClean
+    [Migration("20260115221251_NombreDeLaMigracion")]
+    partial class NombreDeLaMigracion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,6 +69,9 @@ namespace StockManager.Infrastructure.Migrations
                     b.Property<string>("Note")
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("PaymentMethod")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("SignedQuantity")
                         .HasColumnType("INTEGER");

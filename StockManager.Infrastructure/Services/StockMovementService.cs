@@ -81,6 +81,9 @@ public class StockMovementService : IStockMovementService
         {
             SkuId = sku.Id,
             Type = request.Type,
+            PaymentMethod = request.Type == StockMovementType.Sale
+                ? request.PaymentMethod ?? PaymentMethod.Cash
+                : null,
             SignedQuantity = signedQty,
             UnitPrice = unitPrice,
             UnitCost = unitCost,

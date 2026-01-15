@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace StockManager.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitClean : Migration
+    public partial class NombreDeLaMigracion : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -39,6 +39,7 @@ namespace StockManager.Infrastructure.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     SkuId = table.Column<int>(type: "INTEGER", nullable: false),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    PaymentMethod = table.Column<int>(type: "INTEGER", nullable: true),
                     SignedQuantity = table.Column<int>(type: "INTEGER", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "TEXT", nullable: true),
                     UnitCost = table.Column<decimal>(type: "TEXT", nullable: true),

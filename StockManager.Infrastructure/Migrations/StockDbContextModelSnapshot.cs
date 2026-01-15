@@ -67,6 +67,9 @@ namespace StockManager.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("PaymentMethod")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("SignedQuantity")
                         .HasColumnType("INTEGER");
 

@@ -29,12 +29,26 @@ public class DashboardQueryService : IDashboardQueryService
             (decimal?)(Math.Abs(m.SignedQuantity) * (m.UnitPrice ?? (m.Sku != null ? m.Sku.Price : 0m)))
         ) ?? 0m;
 
+        var cashRevenue = await q
+            .Where(m => m.PaymentMethod == PaymentMethod.Cash)
+            .SumAsync(m =>
+                (decimal?)(Math.Abs(m.SignedQuantity) * (m.UnitPrice ?? (m.Sku != null ? m.Sku.Price : 0m)))
+            ) ?? 0m;
+
+        var cardRevenue = await q
+            .Where(m => m.PaymentMethod == PaymentMethod.MercadoPago)
+            .SumAsync(m =>
+                (decimal?)(Math.Abs(m.SignedQuantity) * (m.UnitPrice ?? (m.Sku != null ? m.Sku.Price : 0m)))
+            ) ?? 0m;
+
         var salesCount = await q.CountAsync();
 
         return new DashboardSummaryDto
         {
             UnitsSold = unitsSold,
             Revenue = revenue,
+            CashRevenue = cashRevenue,
+            CardRevenue = cardRevenue,
             SalesCount = salesCount
         };
     }

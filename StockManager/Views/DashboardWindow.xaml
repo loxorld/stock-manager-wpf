@@ -105,7 +105,7 @@
             </Grid.RowDefinitions>
 
             <!-- KPIs -->
-            <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,12">
+            <UniformGrid Grid.Row="0" Columns="5" Margin="0,0,0,12">
                 <materialDesign:Card Margin="0,0,10,0" Padding="14">
                     <StackPanel>
                         <TextBlock Text="Ingresos" Opacity="0.75"/>
@@ -113,6 +113,23 @@
                                    FontSize="20" FontWeight="SemiBold"/>
                     </StackPanel>
                 </materialDesign:Card>
+
+                <materialDesign:Card Margin="0,0,10,0" Padding="14">
+                    <StackPanel>
+                        <TextBlock Text="Efectivo" Opacity="0.75"/>
+                        <TextBlock Text="{Binding CashRevenue, StringFormat={}{0:C}}"
+                                   FontSize="20" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <materialDesign:Card Margin="0,0,10,0" Padding="14">
+                    <StackPanel>
+                        <TextBlock Text="MercadoPago / tarjeta" Opacity="0.75"/>
+                        <TextBlock Text="{Binding CardRevenue, StringFormat={}{0:C}}"
+                                   FontSize="20" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
 
                 <materialDesign:Card Margin="0,0,10,0" Padding="14">
                     <StackPanel>
