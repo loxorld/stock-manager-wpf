@@ -232,153 +232,159 @@
             <!-- Detail -->
             <materialDesign:Card Grid.Column="1" Margin="12,0,0,0" Padding="14">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Margin="0,0,0,10">
-                        <TextBlock Text="Detalle" FontSize="16" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding DetailTitle}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold"
-                                   TextWrapping="Wrap"
-                                   Margin="0,8,0,0"/>
-                    </StackPanel>
-
-                    <WrapPanel Grid.Row="1" Margin="0,0,0,10" ItemWidth="150" ItemHeight="70">
-                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                    <materialDesign:PackIcon Kind="TagOutline" Width="16" Height="16" Opacity="0.7"/>
-                                    <TextBlock Text="Categoría" Margin="6,0,0,0" Opacity="0.7"/>
-                                </StackPanel>
-                                <TextBlock Text="{Binding DetailCategory}" FontWeight="SemiBold"/>
+                            <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                                <TextBlock Text="Detalle" FontSize="16" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding DetailTitle}"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"
+                                           Margin="0,8,0,0"/>
                             </StackPanel>
-                        </materialDesign:Card>
 
-                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                    <materialDesign:PackIcon Kind="ShieldCheckOutline" Width="16" Height="16" Opacity="0.7"/>
-                                    <TextBlock Text="Estado" Margin="6,0,0,0" Opacity="0.7"/>
-                                </StackPanel>
-                                <TextBlock Text="{Binding DetailActive}" FontWeight="SemiBold"/>
-                            </StackPanel>
-                        </materialDesign:Card>
+                            <WrapPanel Grid.Row="1" Margin="0,0,0,10" ItemWidth="150" ItemHeight="70">
+                                <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <materialDesign:PackIcon Kind="TagOutline" Width="16" Height="16" Opacity="0.7"/>
+                                            <TextBlock Text="Categoría" Margin="6,0,0,0" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DetailCategory}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
 
-                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                    <materialDesign:PackIcon Kind="PackageVariantClosed" Width="16" Height="16" Opacity="0.7"/>
-                                    <TextBlock Text="Stock" Margin="6,0,0,0" Opacity="0.7"/>
-                                </StackPanel>
-                                <TextBlock Text="{Binding DetailStock}" FontWeight="SemiBold"/>
-                            </StackPanel>
-                        </materialDesign:Card>
+                                <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <materialDesign:PackIcon Kind="ShieldCheckOutline" Width="16" Height="16" Opacity="0.7"/>
+                                            <TextBlock Text="Estado" Margin="6,0,0,0" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DetailActive}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
 
-                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                    <materialDesign:PackIcon Kind="CurrencyUsd" Width="16" Height="16" Opacity="0.7"/>
-                                    <TextBlock Text="Precio" Margin="6,0,0,0" Opacity="0.7"/>
-                                </StackPanel>
-                                <TextBlock Text="{Binding DetailPrice, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
-                            </StackPanel>
-                        </materialDesign:Card>
+                                <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <materialDesign:PackIcon Kind="PackageVariantClosed" Width="16" Height="16" Opacity="0.7"/>
+                                            <TextBlock Text="Stock" Margin="6,0,0,0" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DetailStock}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
 
-                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                    <materialDesign:PackIcon Kind="Cash" Width="16" Height="16" Opacity="0.7"/>
-                                    <TextBlock Text="Costo" Margin="6,0,0,0" Opacity="0.7"/>
-                                </StackPanel>
-                                <TextBlock Text="{Binding DetailCost, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
-                            </StackPanel>
-                        </materialDesign:Card>
+                                <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <materialDesign:PackIcon Kind="CurrencyUsd" Width="16" Height="16" Opacity="0.7"/>
+                                            <TextBlock Text="Precio" Margin="6,0,0,0" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DetailPrice, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
 
-                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                    <materialDesign:PackIcon Kind="ChartLine" Width="16" Height="16" Opacity="0.7"/>
-                                    <TextBlock Text="Margen" Margin="6,0,0,0" Opacity="0.7"/>
-                                </StackPanel>
-                                <TextBlock Text="{Binding DetailMargin, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
-                            </StackPanel>
-                        </materialDesign:Card>
-                    </WrapPanel>
+                                <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <materialDesign:PackIcon Kind="Cash" Width="16" Height="16" Opacity="0.7"/>
+                                            <TextBlock Text="Costo" Margin="6,0,0,0" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DetailCost, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
 
-                    <materialDesign:Card Grid.Row="2" Padding="10" Margin="0,0,0,12">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="History" Width="16" Height="16" Opacity="0.7"/>
-                                <TextBlock Text="Último movimiento" Margin="6,0,0,0" FontWeight="SemiBold"/>
-                            </StackPanel>
-                            <TextBlock Text="{Binding LastMovementText}"
-                                       Opacity="0.9"
-                                       TextWrapping="Wrap"
-                                       Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </materialDesign:Card>
+                                <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <materialDesign:PackIcon Kind="ChartLine" Width="16" Height="16" Opacity="0.7"/>
+                                            <TextBlock Text="Margen" Margin="6,0,0,0" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DetailMargin, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+                            </WrapPanel>
 
-
-                    <StackPanel Grid.Row="3">
-                        <TextBlock Text="Acciones rápidas" FontWeight="SemiBold" Margin="0,0,0,8"/>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <Button Width="150" Margin="0,0,10,0"
-                                    Command="{Binding QuickPurchaseCommand}"
-                                    Style="{StaticResource MaterialDesignOutlinedButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="CartPlus" Width="18" Height="18" Margin="0,0,8,0"/>
-                                    <TextBlock Text="+1 compra"/>
-                                </StackPanel>
-                            </Button>
-
-                            <Button Width="150"
-                                    Command="{Binding QuickSaleCommand}"
-                                    Style="{StaticResource MaterialDesignOutlinedButton}">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="CartMinus" Width="18" Height="18" Margin="0,0,8,0"/>
-                                    <TextBlock Text="-1 venta"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-
-                        <Button Margin="0,0,0,8"
-                                Click="RegisterMovement_Click"
-                                Style="{StaticResource MaterialDesignRaisedButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="SwapVertical" Width="18" Height="18" Margin="0,0,8,0"/>
-                                <TextBlock Text="Registrar movimiento..."/>
-                            </StackPanel>
-                        </Button>
-
-                        <Button Click="ViewHistory_Click"
-                                Style="{StaticResource MaterialDesignOutlinedButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="History" Width="18" Height="18" Margin="0,0,8,0"/>
-                                <TextBlock Text="Ver historial..."/>
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Overlay detalle -->
-                        <Grid Background="#55FFFFFF"
-                              Visibility="{Binding IsDetailLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                              Margin="-14,-14,-14,-14">
-                            <materialDesign:Card Padding="14"
-                                                 HorizontalAlignment="Center"
-                                                 VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal">
-                                    <ProgressBar Width="120" Height="6" IsIndeterminate="True"/>
-                                    <TextBlock Text="  Cargando detalle..." VerticalAlignment="Center" Margin="12,0,0,0"/>
+                            <materialDesign:Card Grid.Row="2" Padding="10" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="History" Width="16" Height="16" Opacity="0.7"/>
+                                        <TextBlock Text="Último movimiento" Margin="6,0,0,0" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding LastMovementText}"
+                                               Opacity="0.9"
+                                               TextWrapping="Wrap"
+                                               Margin="0,6,0,0"/>
                                 </StackPanel>
                             </materialDesign:Card>
-                        </Grid>
 
-                    </StackPanel>
+
+                            <StackPanel Grid.Row="3">
+                                <TextBlock Text="Acciones rápidas" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                                <UniformGrid Columns="2" Margin="0,0,0,10">
+                                    <Button Margin="0,0,10,0"
+                                            MinWidth="120"
+                                            Command="{Binding QuickPurchaseCommand}"
+                                            Style="{StaticResource MaterialDesignOutlinedButton}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="CartPlus" Width="18" Height="18" Margin="0,0,8,0"/>
+                                            <TextBlock Text="+1 compra"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Margin="0,0,0,0"
+                                            MinWidth="120"
+                                            Command="{Binding QuickSaleCommand}"
+                                            Style="{StaticResource MaterialDesignOutlinedButton}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="CartMinus" Width="18" Height="18" Margin="0,0,8,0"/>
+                                            <TextBlock Text="-1 venta"/>
+                                        </StackPanel>
+                                    </Button>
+                                </UniformGrid>
+
+                                <Button Margin="0,0,0,8"
+                                        Click="RegisterMovement_Click"
+                                        Style="{StaticResource MaterialDesignRaisedButton}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="SwapVertical" Width="18" Height="18" Margin="0,0,8,0"/>
+                                        <TextBlock Text="Registrar movimiento..."/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Click="ViewHistory_Click"
+                                        Style="{StaticResource MaterialDesignOutlinedButton}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="History" Width="18" Height="18" Margin="0,0,8,0"/>
+                                        <TextBlock Text="Ver historial..."/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <!-- Overlay detalle -->
+                    <Grid Background="#55FFFFFF"
+                          Visibility="{Binding IsDetailLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                          Margin="-14,-14,-14,-14">
+                        <materialDesign:Card Padding="14"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <ProgressBar Width="120" Height="6" IsIndeterminate="True"/>
+                                <TextBlock Text="  Cargando detalle..." VerticalAlignment="Center" Margin="12,0,0,0"/>
+                            </StackPanel>
+                        </materialDesign:Card>
+                    </Grid>
                 </Grid>
             </materialDesign:Card>
 
