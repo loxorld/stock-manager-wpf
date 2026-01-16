@@ -6,6 +6,7 @@ using StockManager.Views;
 using System;
 using System.Linq;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 
 namespace StockManager.ViewModels;
@@ -59,6 +60,7 @@ public partial class DashboardViewModel : ObservableObject
         var today = DateTime.Today;
         FromDate = today;
         ToDate = today;
+        HasDailySales = true;
     }
 
     [RelayCommand]
@@ -72,6 +74,7 @@ public partial class DashboardViewModel : ObservableObject
     public async Task LoadAsync()
     {
         IsLoading = true;
+        HasDailySales = true;
         try
         {
             var (fromUtc, toUtc) = SelectedPeriod == DashboardPeriod.Range
@@ -102,6 +105,15 @@ public partial class DashboardViewModel : ObservableObject
             DailySales.Clear();
             foreach (var it in dailySales) DailySales.Add(it);
             MaxDailyRevenue = DailySales.Count == 0 ? 1 : DailySales.Max(x => x.Revenue);
+            HasDailySales = DailySales.Count > 0;
+
+            if (SelectedPeriod == DashboardPeriod.Range)
+            {
+                Debug.WriteLine(
+                    $"[Dashboard] ApplyRange FromDate={FromDate:yyyy-MM-dd} ToDate={ToDate:yyyy-MM-dd} " +
+                    $"DailySalesCount={DailySales.Count} MaxDailyRevenue={MaxDailyRevenue}"
+                );
+            }
 
 
 

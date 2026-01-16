@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -8,7 +9,17 @@ namespace StockManager.Converters;
 public class BooleanNegationConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        => value is bool flag ? !flag : value;
+    {
+        if (value is not bool flag)
+            return targetType == typeof(Visibility) ? Visibility.Visible : value;
+
+        var negated = !flag;
+
+        if (targetType == typeof(Visibility))
+            return negated ? Visibility.Visible : Visibility.Collapsed;
+
+        return negated;
+    }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
