@@ -5,6 +5,15 @@ using System.Windows.Media;
 
 namespace StockManager.Converters;
 
+public class BooleanNegationConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is bool flag ? !flag : value;
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
 public class StockLevelToBrushConverter : IValueConverter
 {
     private static readonly Brush CriticalBackground = new SolidColorBrush(Color.FromRgb(0xFF, 0xE0, 0xE0));

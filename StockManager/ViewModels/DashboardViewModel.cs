@@ -34,6 +34,9 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private DateTime? fromDate;
     [ObservableProperty] private DateTime? toDate;
     [ObservableProperty] private decimal maxDailyRevenue = 1;
+    [ObservableProperty] private bool hasDailySales;
+    [ObservableProperty] private bool hasTopByUnits;
+    [ObservableProperty] private bool hasTopByRevenue;
 
     [ObservableProperty] private string revenueDeltaText = "Sin cambios";
     [ObservableProperty] private string cashRevenueDeltaText = "Sin cambios";
@@ -106,9 +109,11 @@ public partial class DashboardViewModel : ObservableObject
             TopByRevenue.Clear();
             var topByUnits = await _dashboard.GetTopByUnitsAsync(fromUtc, toUtc);
             foreach (var it in topByUnits) TopByUnits.Add(it);
+            HasTopByUnits = TopByUnits.Count > 0;
 
             var topByRevenue = await _dashboard.GetTopByRevenueAsync(fromUtc, toUtc);
             foreach (var it in topByRevenue) TopByRevenue.Add(it);
+            HasTopByRevenue = TopByRevenue.Count > 0;
         }
         catch (Exception ex)
         {

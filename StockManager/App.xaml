@@ -23,6 +23,7 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <conv:BooleanToOpacityConverter x:Key="BooleanToOpacityConverter"/>
             <conv:StockLevelToBrushConverter x:Key="StockLevelToBrushConverter"/>
+            <conv:BooleanNegationConverter x:Key="BooleanNegationConverter"/>
 
         </ResourceDictionary>
     </Application.Resources>
