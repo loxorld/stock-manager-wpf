@@ -13,6 +13,11 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="KpiCardStyle" TargetType="materialDesign:Card">
+                <Setter Property="Padding" Value="14"/>
+                <Setter Property="Margin" Value="0,0,10,0"/>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -106,50 +111,187 @@
 
             <!-- KPIs -->
             <UniformGrid Grid.Row="0" Columns="5" Margin="0,0,0,12">
-                <materialDesign:Card Margin="0,0,10,0" Padding="14">
-                    <StackPanel>
-                        <TextBlock Text="Ingresos" Opacity="0.75"/>
-                        <TextBlock Text="{Binding Revenue, StringFormat={}{0:C}}"
-                                   FontSize="20" FontWeight="SemiBold"/>
-                    </StackPanel>
+                <materialDesign:Card Style="{StaticResource KpiCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="CurrencyUsd" Width="22" Height="22" Opacity="0.7"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Ingresos" Opacity="0.75"/>
+                            <TextBlock Text="{Binding Revenue, StringFormat={}{0:C}}"
+                                       FontSize="20" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding RevenueDeltaText}" FontSize="11" Opacity="0.7"/>
+                        </StackPanel>
+                    </Grid>
                 </materialDesign:Card>
 
-                <materialDesign:Card Margin="0,0,10,0" Padding="14">
-                    <StackPanel>
-                        <TextBlock Text="Efectivo" Opacity="0.75"/>
-                        <TextBlock Text="{Binding CashRevenue, StringFormat={}{0:C}}"
-                                   FontSize="20" FontWeight="SemiBold"/>
-                    </StackPanel>
+                <materialDesign:Card Style="{StaticResource KpiCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="Cash" Width="22" Height="22" Opacity="0.7"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Efectivo" Opacity="0.75"/>
+                            <TextBlock Text="{Binding CashRevenue, StringFormat={}{0:C}}"
+                                       FontSize="20" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding CashRevenueDeltaText}" FontSize="11" Opacity="0.7"/>
+                        </StackPanel>
+                    </Grid>
                 </materialDesign:Card>
 
-                <materialDesign:Card Margin="0,0,10,0" Padding="14">
-                    <StackPanel>
-                        <TextBlock Text="MercadoPago / tarjeta" Opacity="0.75"/>
-                        <TextBlock Text="{Binding CardRevenue, StringFormat={}{0:C}}"
-                                   FontSize="20" FontWeight="SemiBold"/>
-                    </StackPanel>
+                <materialDesign:Card Style="{StaticResource KpiCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="CreditCardOutline" Width="22" Height="22" Opacity="0.7"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="MercadoPago / tarjeta" Opacity="0.75"/>
+                            <TextBlock Text="{Binding CardRevenue, StringFormat={}{0:C}}"
+                                       FontSize="20" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding CardRevenueDeltaText}" FontSize="11" Opacity="0.7"/>
+                        </StackPanel>
+                    </Grid>
                 </materialDesign:Card>
 
 
-                <materialDesign:Card Margin="0,0,10,0" Padding="14">
-                    <StackPanel>
-                        <TextBlock Text="Unidades vendidas" Opacity="0.75"/>
-                        <TextBlock Text="{Binding UnitsSold}"
-                                   FontSize="20" FontWeight="SemiBold"/>
-                    </StackPanel>
+                <materialDesign:Card Style="{StaticResource KpiCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="PackageVariant" Width="22" Height="22" Opacity="0.7"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Unidades vendidas" Opacity="0.75"/>
+                            <TextBlock Text="{Binding UnitsSold}"
+                                       FontSize="20" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding UnitsSoldDeltaText}" FontSize="11" Opacity="0.7"/>
+                        </StackPanel>
+                    </Grid>
                 </materialDesign:Card>
 
                 <materialDesign:Card Padding="14">
-                    <StackPanel>
-                        <TextBlock Text="Ventas (movimientos)" Opacity="0.75"/>
-                        <TextBlock Text="{Binding SalesCount}"
-                                   FontSize="20" FontWeight="SemiBold"/>
-                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="ReceiptTextOutline" Width="22" Height="22" Opacity="0.7"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Ventas (movimientos)" Opacity="0.75"/>
+                            <TextBlock Text="{Binding SalesCount}"
+                                       FontSize="20" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding SalesCountDeltaText}" FontSize="11" Opacity="0.7"/>
+                        </StackPanel>
+                    </Grid>
                 </materialDesign:Card>
             </UniformGrid>
 
+            <!-- Chart + Top products -->
+            <Grid Grid.Row="1" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <materialDesign:Card Grid.Column="0" Padding="12" Margin="0,0,12,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Ventas por día"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,10"/>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding DailySales}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Date, StringFormat={}{0:dd/MM}}" Opacity="0.7"/>
+                                            <ProgressBar Grid.Column="1"
+                                                         Height="10"
+                                                         VerticalAlignment="Center"
+                                                         Maximum="{Binding DataContext.MaxDailyRevenue, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                         Value="{Binding Revenue}"/>
+                                            <TextBlock Grid.Column="2"
+                                                       Text="{Binding Revenue, StringFormat={}{0:C}}"
+                                                       HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </materialDesign:Card>
+
+                <StackPanel Grid.Column="1">
+                    <materialDesign:Card Padding="12" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Top por unidades" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <ItemsControl Grid.Row="1" ItemsSource="{Binding TopByUnits}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="60"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Units}" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </materialDesign:Card>
+
+                    <materialDesign:Card Padding="12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Top por ingresos" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <ItemsControl Grid.Row="1" ItemsSource="{Binding TopByRevenue}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="80"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Revenue, StringFormat={}{0:C}}"
+                                                       HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </materialDesign:Card>
+                </StackPanel>
+            </Grid>
+
+
             <!-- Tables -->
-            <materialDesign:Card Grid.Row="1" Padding="12">
+            <materialDesign:Card Grid.Row="2" Padding="12">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -157,35 +299,35 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0"
-                   Text="Historial de ventas"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,10"/>
+                               Text="Historial de ventas"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
 
                     <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding SalesHistory}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  CanUserAddRows="False"
-                  HeadersVisibility="Column"
-                  GridLinesVisibility="None"
-                  RowHeight="34"
-                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                  EnableRowVirtualization="True"
-                  VirtualizingPanel.IsVirtualizing="True"
-                  VirtualizingPanel.VirtualizationMode="Recycling">
+                              ItemsSource="{Binding SalesHistory}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="None"
+                              RowHeight="34"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              EnableRowVirtualization="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Fecha"
-                                    Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}"
-                                    Width="170"/>
+                                                Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}"
+                                                Width="170"/>
                             <DataGridTextColumn Header="SKU" Binding="{Binding SkuName}" Width="*"/>
                             <DataGridTextColumn Header="Cant." Binding="{Binding Quantity}" Width="80"/>
                             <DataGridTextColumn Header="P. Unit."
-                                    Binding="{Binding UnitPrice, StringFormat={}{0:C}}"
-                                    Width="120"/>
+                                                Binding="{Binding UnitPrice, StringFormat={}{0:C}}"
+                                                Width="120"/>
                             <DataGridTextColumn Header="Total"
-                                    Binding="{Binding Total, StringFormat={}{0:C}}"
-                                    Width="120"/>
+                                                Binding="{Binding Total, StringFormat={}{0:C}}"
+                                                Width="120"/>
                             <DataGridTextColumn Header="Nota" Binding="{Binding Note}" Width="220"/>
                         </DataGrid.Columns>
                     </DataGrid>

@@ -94,7 +94,7 @@
                                                  Width="18" Height="18"
                                                  Margin="0,0,8,0"
                                                  Foreground="#C62828"/>
-                        <TextBlock Text="Eliminar SKU" Foreground="#C62828"/>
+                        <TextBlock Text="Eliminar Item" Foreground="#C62828"/>
                     </StackPanel>
                 </Button>
 
@@ -171,45 +171,48 @@
                               CanUserAddRows="False"
                               HeadersVisibility="Column"
                               GridLinesVisibility="None"
-                              RowHeight="34"
+                              RowHeight="36"
                               Margin="0">
 
-                        <!-- Resaltado stock bajo -->
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Style.Triggers>
-                                    <!-- Rojo crítico 0-2 -->
-                                    <DataTrigger Binding="{Binding Stock}" Value="0">
-                                        <Setter Property="Background" Value="#FFFFD6D6"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Stock}" Value="1">
-                                        <Setter Property="Background" Value="#FFFFD6D6"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Stock}" Value="2">
-                                        <Setter Property="Background" Value="#FFFFD6D6"/>
-                                    </DataTrigger>
-
-                                    <!-- Amarillo bajo 3-5 -->
-                                    <DataTrigger Binding="{Binding Stock}" Value="3">
-                                        <Setter Property="Background" Value="#FFFFF4C8"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Stock}" Value="4">
-                                        <Setter Property="Background" Value="#FFFFF4C8"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Stock}" Value="5">
-                                        <Setter Property="Background" Value="#FFFFF4C8"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>
+                        
 
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="3*"/>
                             <DataGridTextColumn Header="Categoría" Binding="{Binding Category}" Width="1.1*"/>
-                            <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="0.7*"/>
+                            <DataGridTemplateColumn Header="Stock" Width="0.8*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding Stock, Converter={StaticResource StockLevelToBrushConverter}}"
+                                                Padding="6,2"
+                                                CornerRadius="10"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding Stock}"
+                                                       Foreground="{Binding Stock, Converter={StaticResource StockLevelToBrushConverter}, ConverterParameter=Foreground}"
+                                                       FontWeight="SemiBold"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Precio" Binding="{Binding Price, StringFormat={}{0:C}}" Width="0.9*"/>
                         </DataGrid.Columns>
                     </DataGrid>
+
+                    <!-- Empty state -->
+                    <Grid Background="#00FFFFFF"
+                          Visibility="{Binding IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="PackageVariantClosed" Width="48" Height="48" Opacity="0.35"/>
+                            <TextBlock Text="No hay SKUs para mostrar"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Margin="0,12,0,4"
+                                       Opacity="0.8"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Creá un nuevo ítem o ajustá los filtros."
+                                       Opacity="0.7"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
 
                     <!-- Loading overlay -->
                     <Grid Background="#55FFFFFF"
@@ -245,46 +248,81 @@
                                    Margin="0,8,0,0"/>
                     </StackPanel>
 
-                    <Grid Grid.Row="1" Margin="0,0,0,10">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                    <WrapPanel Grid.Row="1" Margin="0,0,0,10" ItemWidth="150" ItemHeight="70">
+                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <materialDesign:PackIcon Kind="TagOutline" Width="16" Height="16" Opacity="0.7"/>
+                                    <TextBlock Text="Categoría" Margin="6,0,0,0" Opacity="0.7"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding DetailCategory}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </materialDesign:Card>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Categoría" Opacity="0.7"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DetailCategory}"/>
+                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <materialDesign:PackIcon Kind="ShieldCheckOutline" Width="16" Height="16" Opacity="0.7"/>
+                                    <TextBlock Text="Estado" Margin="6,0,0,0" Opacity="0.7"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding DetailActive}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </materialDesign:Card>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Estado" Opacity="0.7"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DetailActive}"/>
+                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <materialDesign:PackIcon Kind="PackageVariantClosed" Width="16" Height="16" Opacity="0.7"/>
+                                    <TextBlock Text="Stock" Margin="6,0,0,0" Opacity="0.7"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding DetailStock}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </materialDesign:Card>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Stock" Opacity="0.7"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DetailStock}"/>
+                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <materialDesign:PackIcon Kind="CurrencyUsd" Width="16" Height="16" Opacity="0.7"/>
+                                    <TextBlock Text="Precio" Margin="6,0,0,0" Opacity="0.7"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding DetailPrice, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </materialDesign:Card>
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Precio" Opacity="0.7"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DetailPrice, StringFormat={}{0:C}}"/>
+                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <materialDesign:PackIcon Kind="Cash" Width="16" Height="16" Opacity="0.7"/>
+                                    <TextBlock Text="Costo" Margin="6,0,0,0" Opacity="0.7"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding DetailCost, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </materialDesign:Card>
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Costo" Opacity="0.7"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DetailCost, StringFormat={}{0:C}}"/>
+                        <materialDesign:Card Margin="0,0,10,10" Padding="10">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <materialDesign:PackIcon Kind="ChartLine" Width="16" Height="16" Opacity="0.7"/>
+                                    <TextBlock Text="Margen" Margin="6,0,0,0" Opacity="0.7"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding DetailMargin, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </materialDesign:Card>
+                    </WrapPanel>
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Margen" Opacity="0.7"/>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding DetailMargin, StringFormat={}{0:C}}"/>
-                    </Grid>
+                    <materialDesign:Card Grid.Row="2" Padding="10" Margin="0,0,0,12">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="History" Width="16" Height="16" Opacity="0.7"/>
+                                <TextBlock Text="Último movimiento" Margin="6,0,0,0" FontWeight="SemiBold"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding LastMovementText}"
+                                       Opacity="0.9"
+                                       TextWrapping="Wrap"
+                                       Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </materialDesign:Card>
 
-                    <StackPanel Grid.Row="2" Margin="0,0,0,12">
-                        <TextBlock Text="Último movimiento" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding LastMovementText}"
-                                   Opacity="0.9"
-                                   TextWrapping="Wrap"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
 
                     <StackPanel Grid.Row="3">
                         <TextBlock Text="Acciones rápidas" FontWeight="SemiBold" Margin="0,0,0,8"/>

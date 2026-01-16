@@ -127,4 +127,33 @@ public class DashboardQueryService : IDashboardQueryService
 
         return items;
     }
+
+    public async Task<List<DashboardDailySalesDto>> GetDailySalesAsync(DateTime fromUtc, DateTime toUtc)
+    {
+        var q = _db.StockMovements
+            .AsNoTracking()
+            .Where(m => m.CreatedAt >= fromUtc && m.CreatedAt < toUtc)
+            .Where(m => m.Type == StockMovementType.Sale)
+            .OrderBy(m => m.CreatedAt);
+
+        var items = await q
+            .Select(m => new
+            {
+                m.CreatedAt,
+                m.SignedQuantity,
+                UnitPrice = m.UnitPrice ?? (m.Sku != null ? m.Sku.Price : 0m)
+            })
+            .ToListAsync();
+
+        return items
+            .GroupBy(x => x.CreatedAt.ToLocalTime().Date)
+            .Select(g => new DashboardDailySalesDto
+            {
+                Date = g.Key,
+                Units = g.Sum(x => Math.Abs(x.SignedQuantity)),
+                Revenue = g.Sum(x => x.UnitPrice * Math.Abs(x.SignedQuantity))
+            })
+            .OrderBy(x => x.Date)
+            .ToList();
+    }
 }

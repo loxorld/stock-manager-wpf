@@ -4,9 +4,9 @@ using StockManager.Application.Dtos;
 using StockManager.Application.Services;
 using StockManager.Views;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Collections.ObjectModel;
-using System.Text;
+
 
 namespace StockManager.ViewModels;
 
@@ -33,10 +33,18 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private int salesCount;
     [ObservableProperty] private DateTime? fromDate;
     [ObservableProperty] private DateTime? toDate;
+    [ObservableProperty] private decimal maxDailyRevenue = 1;
+
+    [ObservableProperty] private string revenueDeltaText = "Sin cambios";
+    [ObservableProperty] private string cashRevenueDeltaText = "Sin cambios";
+    [ObservableProperty] private string cardRevenueDeltaText = "Sin cambios";
+    [ObservableProperty] private string unitsSoldDeltaText = "Sin cambios";
+    [ObservableProperty] private string salesCountDeltaText = "Sin cambios";
 
 
     public ObservableCollection<DashboardTopItemDto> TopByUnits { get; } = new();
     public ObservableCollection<DashboardTopItemDto> TopByRevenue { get; } = new();
+    public ObservableCollection<DashboardDailySalesDto> DailySales { get; } = new();
 
     public ObservableCollection<DashboardSaleHistoryItemDto> SalesHistory { get; } = new();
 
@@ -67,6 +75,8 @@ public partial class DashboardViewModel : ObservableObject
                 ? GetCustomRangeUtc()
                 : GetRangeUtc(SelectedPeriod);
 
+            var (prevFromUtc, prevToUtc) = GetPreviousRangeUtc(fromUtc, toUtc);
+
             var summary = await _dashboard.GetSummaryAsync(fromUtc, toUtc);
             Revenue = summary.Revenue;
             CashRevenue = summary.CashRevenue;
@@ -74,11 +84,24 @@ public partial class DashboardViewModel : ObservableObject
             UnitsSold = summary.UnitsSold;
             SalesCount = summary.SalesCount;
 
+            var previousSummary = await _dashboard.GetSummaryAsync(prevFromUtc, prevToUtc);
+            RevenueDeltaText = BuildDeltaText(Revenue, previousSummary.Revenue);
+            CashRevenueDeltaText = BuildDeltaText(CashRevenue, previousSummary.CashRevenue);
+            CardRevenueDeltaText = BuildDeltaText(CardRevenue, previousSummary.CardRevenue);
+            UnitsSoldDeltaText = BuildDeltaText(UnitsSold, previousSummary.UnitsSold);
+            SalesCountDeltaText = BuildDeltaText(SalesCount, previousSummary.SalesCount);
+
             var history = await _dashboard.GetSalesHistoryAsync(fromUtc, toUtc);
             SalesHistory.Clear();
             foreach (var it in history) SalesHistory.Add(it);
 
-            
+            var dailySales = await _dashboard.GetDailySalesAsync(fromUtc, toUtc);
+            DailySales.Clear();
+            foreach (var it in dailySales) DailySales.Add(it);
+            MaxDailyRevenue = DailySales.Count == 0 ? 1 : DailySales.Max(x => x.Revenue);
+
+
+
             TopByUnits.Clear();
             TopByRevenue.Clear();
             var topByUnits = await _dashboard.GetTopByUnitsAsync(fromUtc, toUtc);
@@ -163,6 +186,29 @@ public partial class DashboardViewModel : ObservableObject
         var fromUtc = TimeZoneInfo.ConvertTimeToUtc(startLocal, tz);
         var toUtc = TimeZoneInfo.ConvertTimeToUtc(endLocal, tz);
         return (fromUtc, toUtc);
+    }
+
+    private static (DateTime fromUtc, DateTime toUtc) GetPreviousRangeUtc(DateTime fromUtc, DateTime toUtc)
+    {
+        var span = toUtc - fromUtc;
+        return (fromUtc - span, fromUtc);
+    }
+
+    private static string BuildDeltaText(decimal current, decimal previous)
+        => BuildDeltaText((double)current, (double)previous);
+
+    private static string BuildDeltaText(int current, int previous)
+        => BuildDeltaText(current, (double)previous);
+
+    private static string BuildDeltaText(double current, double previous)
+    {
+        if (Math.Abs(previous) < 0.0001)
+            return current == 0 ? "Sin cambios" : "Nuevo período";
+
+        var delta = current - previous;
+        var percent = delta / previous;
+        var arrow = percent >= 0 ? "▲" : "▼";
+        return $"{arrow} {Math.Abs(percent):P0} vs período anterior";
     }
 }
 

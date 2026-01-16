@@ -19,6 +19,7 @@ public partial class StockViewModel : ObservableObject
     [ObservableProperty] private SkuListItemDto? selectedItem;
     [ObservableProperty] private string searchText = "";
     [ObservableProperty] private bool isLoading;
+    [ObservableProperty] private bool isEmpty = true;
 
     // ====== Filtros ======
     public IReadOnlyList<CategoryFilterOption> CategoryOptions { get; } =
@@ -82,6 +83,7 @@ public partial class StockViewModel : ObservableObject
         _movementQueryService = movementQueryService;
 
         selectedCategoryOption = CategoryOptions[0]; // "Todas"
+        Items.CollectionChanged += (_, _) => UpdateEmptyState();
     }
 
     // Auto-búsqueda
@@ -129,6 +131,7 @@ public partial class StockViewModel : ObservableObject
 
             //  restaurar selección
             RestoreSelection(selectedId);
+            UpdateEmptyState();
         }
         finally
         {
@@ -253,5 +256,10 @@ public partial class StockViewModel : ObservableObject
         var match = Items.FirstOrDefault(x => x.Id == selectedId.Value);
         if (match != null)
             SelectedItem = match;
+    }
+
+    private void UpdateEmptyState()
+    {
+        IsEmpty = Items.Count == 0;
     }
 }
