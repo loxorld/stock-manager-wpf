@@ -4,6 +4,7 @@ using StockManager.Application.Dtos;
 using StockManager.Application.Services;
 using StockManager.Domain.Enums;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace StockManager.ViewModels;
 
@@ -65,7 +66,10 @@ public partial class StockViewModel : ObservableObject
     [ObservableProperty] private string detailCategory = "-";
     
     [ObservableProperty] private string detailActive = "-";
+    [ObservableProperty] private bool isCaseDetail;
 
+    [ObservableProperty] private int detailCaseStockWomen;
+    [ObservableProperty] private int detailCaseStockMen;
     [ObservableProperty] private int detailStock;
     [ObservableProperty] private decimal detailPrice;
     [ObservableProperty] private decimal detailCost;
@@ -153,7 +157,10 @@ public partial class StockViewModel : ObservableObject
             DetailCategory = "-";
             
             DetailActive = "-";
+            IsCaseDetail = false;
             DetailStock = 0;
+            DetailCaseStockWomen = 0;
+            DetailCaseStockMen = 0;
             DetailPrice = 0;
             DetailCost = 0;
             DetailMargin = 0;
@@ -178,12 +185,19 @@ public partial class StockViewModel : ObservableObject
                 DetailCost = detail.Cost;
                 DetailActive = detail.Active ? "Activo" : "Inactivo";
                 DetailMargin = DetailPrice - DetailCost;
+                IsCaseDetail = detail.Category == ProductCategory.Case;
+                DetailStock = detail.Stock;
+                DetailCaseStockWomen = detail.CaseStockWomen;
+                DetailCaseStockMen = detail.CaseStockMen;
             }
             else
             {
                 DetailCost = 0;
                 DetailActive = "-";
                 DetailMargin = 0;
+                IsCaseDetail = false;
+                DetailCaseStockWomen = 0;
+                DetailCaseStockMen = 0;
             }
 
             // Último movimiento 
@@ -207,11 +221,16 @@ public partial class StockViewModel : ObservableObject
 
         try
         {
+            var caseStockKind = GetQuickCaseStockKindOrNull();
+            if (SelectedItem.CategoryValue == ProductCategory.Case && caseStockKind is null)
+                return;
+
             await _movementService.RegisterAsync(new RegisterMovementRequest
             {
                 SkuId = SelectedItem.Id,
                 Type = StockMovementType.PurchaseEntry,
                 Quantity = 1,
+                CaseStockKind = caseStockKind,
                 Note = "Compra rápida (+1)"
             });
 
@@ -231,12 +250,16 @@ public partial class StockViewModel : ObservableObject
 
         try
         {
+            var caseStockKind = GetQuickCaseStockKindOrNull();
+            if (SelectedItem.CategoryValue == ProductCategory.Case && caseStockKind is null)
+                return;
             await _movementService.RegisterAsync(new RegisterMovementRequest
             {
                 SkuId = SelectedItem.Id,
                 Type = StockMovementType.Sale,
                 Quantity = 1,
                 PaymentMethod = PaymentMethod.Cash,
+                CaseStockKind = caseStockKind,
                 Note = "Venta rápida (-1)"
             });
 
@@ -248,6 +271,29 @@ public partial class StockViewModel : ObservableObject
             StockManager.Views.UiError.Show(ex, "No se pudo registrar la venta");
         }
     }
+
+
+    private CaseStockKind? GetQuickCaseStockKindOrNull()
+    {
+        if (SelectedItem?.CategoryValue != ProductCategory.Case)
+            return null;
+
+        var result = MessageBox.Show(
+            "Seleccioná el tipo de funda para la acción rápida:\n\n" +
+            "Sí = Funda de mujer\nNo = Funda de hombre",
+            "Tipo de funda",
+            MessageBoxButton.YesNoCancel,
+            MessageBoxImage.Question
+        );
+
+        return result switch
+        {
+            MessageBoxResult.Yes => CaseStockKind.Women,
+            MessageBoxResult.No => CaseStockKind.Men,
+            _ => null
+        };
+    }
+
 
     private void RestoreSelection(int? selectedId)
     {

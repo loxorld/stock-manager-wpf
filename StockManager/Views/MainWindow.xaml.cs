@@ -42,7 +42,8 @@ public partial class MainWindow : Window
         var mvm = ActivatorUtilities.CreateInstance<RegisterMovementViewModel>(
             _sp,
             _vm.SelectedItem.Id,
-            _vm.SelectedItem.Name
+            _vm.SelectedItem.Name,
+            _vm.SelectedItem.CategoryValue
         );
 
         var win = new RegisterMovementWindow(mvm)

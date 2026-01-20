@@ -15,6 +15,7 @@ public partial class RegisterMovementViewModel : ObservableObject
     private readonly IStockMovementService _service;
 
     public int SkuId { get; }
+    public bool IsCaseSku { get; }
 
     [ObservableProperty]
     private string skuName;
@@ -43,6 +44,13 @@ public partial class RegisterMovementViewModel : ObservableObject
             new(PaymentMethod.MercadoPago, "MercadoPago / Tarjeta")
         };
 
+    public IReadOnlyList<CaseStockKindOption> CaseStockKindOptions { get; } =
+        new List<CaseStockKindOption>
+        {
+            new(CaseStockKind.Women, "Funda de mujer"),
+            new(CaseStockKind.Men, "Funda de hombre")
+        };
+
     // Lo que selecciona el ComboBox
     private MovementTypeOption selectedTypeOption = null!;
     public MovementTypeOption SelectedTypeOption
@@ -65,6 +73,13 @@ public partial class RegisterMovementViewModel : ObservableObject
         set => SetProperty(ref selectedPaymentMethodOption, value);
     }
 
+    private CaseStockKindOption? selectedCaseStockKindOption;
+    public CaseStockKindOption? SelectedCaseStockKindOption
+    {
+        get => selectedCaseStockKindOption;
+        set => SetProperty(ref selectedCaseStockKindOption, value);
+    }
+
     // string para permitir "-" en ajuste
     [ObservableProperty]
     private string quantityText = "1";
@@ -75,15 +90,21 @@ public partial class RegisterMovementViewModel : ObservableObject
     [ObservableProperty]
     private string? errorMessage;
 
-    public RegisterMovementViewModel(IStockMovementService service, int skuId, string skuName)
+    public RegisterMovementViewModel(
+        IStockMovementService service,
+        int skuId,
+        string skuName,
+        ProductCategory category)
     {
         _service = service;
         SkuId = skuId;
         SkuName = skuName;
+        IsCaseSku = category == ProductCategory.Case;
 
         // Default: Venta
         SelectedTypeOption = MovementTypeOptions.First(x => x.Value == Type);
         SelectedPaymentMethodOption = PaymentMethodOptions.First(x => x.Value == PaymentMethod.Cash);
+        SelectedCaseStockKindOption = CaseStockKindOptions.FirstOrDefault();
     }
 
     // Si Type cambia por algún motivo, mantenemos sincronizado el combo.
@@ -149,6 +170,17 @@ public partial class RegisterMovementViewModel : ObservableObject
                     ? SelectedPaymentMethodOption?.Value
                     : null
             };
+
+            if (IsCaseSku)
+            {
+                if (SelectedCaseStockKindOption == null)
+                {
+                    ErrorMessage = "Seleccioná si la funda es de mujer u hombre.";
+                    return;
+                }
+
+                req.CaseStockKind = SelectedCaseStockKindOption.Value;
+            }
 
             if (Type == StockMovementType.Adjustment)
             {

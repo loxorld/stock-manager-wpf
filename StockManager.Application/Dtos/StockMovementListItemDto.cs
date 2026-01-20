@@ -1,4 +1,5 @@
 ﻿using System;
+using StockManager.Domain.Enums;
 
 namespace StockManager.Application.Dtos;
 
@@ -18,7 +19,7 @@ public class StockMovementListItemDto
     // Precio/costo unitario al momento del movimiento (pueden ser null)
     public decimal? UnitPrice { get; set; }
     public decimal? UnitCost { get; set; }
-
+    public CaseStockKind? CaseStockKind { get; set; }
     public string? Note { get; set; }
 
     // Helpers útiles 
@@ -28,5 +29,15 @@ public class StockMovementListItemDto
         UnitPrice.HasValue
             ? UnitPrice.Value * Math.Abs(SignedQuantity)
             : null;
+
+    public string? CaseStockKindLabel => CaseStockKind switch
+    {
+        StockManager.Domain.Enums.CaseStockKind.Women => "Mujer",
+        StockManager.Domain.Enums.CaseStockKind.Men => "Hombre",
+        _ => null
+    };
 }
+
+
+
 

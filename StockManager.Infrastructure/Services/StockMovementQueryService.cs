@@ -28,6 +28,7 @@ public class StockMovementQueryService : IStockMovementQueryService
                 SignedQuantity = x.SignedQuantity,
                 UnitPrice = x.UnitPrice,
                 UnitCost = x.UnitCost,
+                CaseStockKind = x.CaseStockKind,
                 Note = x.Note
             })
             .ToListAsync();

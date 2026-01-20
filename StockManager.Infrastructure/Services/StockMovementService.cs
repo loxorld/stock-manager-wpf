@@ -35,6 +35,10 @@ public class StockMovementService : IStockMovementService
         if (sku == null)
             throw new InvalidOperationException("SKU inexistente.");
 
+        if (sku.Category == ProductCategory.Case && request.CaseStockKind is null)
+            throw new InvalidOperationException("Para fundas, se debe indicar si es de mujer u hombre.");
+
+
         // Calcular signedQty real a aplicar al stock
         int signedQty = request.Type switch
         {
@@ -45,9 +49,33 @@ public class StockMovementService : IStockMovementService
             _ => throw new InvalidOperationException("Tipo de movimiento inválido.")
         };
 
-        var newStock = sku.Stock + signedQty;
-        if (newStock < 0)
-            throw new InvalidOperationException("Stock insuficiente para realizar el movimiento.");
+        if (sku.Category == ProductCategory.Case)
+        {
+            var newCaseStock = request.CaseStockKind == CaseStockKind.Women
+                ? sku.CaseStockWomen + signedQty
+                : sku.CaseStockMen + signedQty;
+
+            if (newCaseStock < 0)
+                throw new InvalidOperationException("Stock insuficiente para realizar el movimiento.");
+
+            if (request.CaseStockKind == CaseStockKind.Women)
+                sku.CaseStockWomen = newCaseStock;
+            else
+                sku.CaseStockMen = newCaseStock;
+
+            sku.Stock = sku.CaseStockWomen + sku.CaseStockMen;
+        }
+        else
+        {
+            if (request.CaseStockKind is not null)
+                throw new InvalidOperationException("Este SKU no es una funda.");
+
+            var newStock = sku.Stock + signedQty;
+            if (newStock < 0)
+                throw new InvalidOperationException("Stock insuficiente para realizar el movimiento.");
+
+            sku.Stock = newStock;
+        }
 
         // Captura de valores “históricos” 
         decimal? unitPrice = null;
@@ -75,7 +103,7 @@ public class StockMovementService : IStockMovementService
 
         using var tx = await _db.Database.BeginTransactionAsync();
 
-        sku.Stock = newStock;
+        
 
         _db.StockMovements.Add(new StockMovement
         {

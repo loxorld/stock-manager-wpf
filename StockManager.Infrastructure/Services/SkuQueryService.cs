@@ -46,7 +46,10 @@ public class SkuQueryService : ISkuQueryService
                 Id = x.Id,
                 Name = x.Name,
                 Category = x.Category.ToString(),
+                CategoryValue = x.Category,
                 Stock = x.Stock,
+                CaseStockWomen = x.CaseStockWomen,
+                CaseStockMen = x.CaseStockMen,
                 Price = x.Price
             })
             .ToListAsync();
@@ -64,6 +67,9 @@ public class SkuQueryService : ISkuQueryService
                 Category = x.Category,
                 CaseType = x.CaseType,
                 ProtectorType = x.ProtectorType,
+                Stock = x.Stock,
+                CaseStockWomen = x.CaseStockWomen,
+                CaseStockMen = x.CaseStockMen,
                 Cost = x.Cost,
                 Price = x.Price,
                 Active = x.Active

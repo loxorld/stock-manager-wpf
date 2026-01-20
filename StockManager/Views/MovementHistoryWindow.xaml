@@ -25,6 +25,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Fecha" Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="1.5*"/>
                 <DataGridTextColumn Header="Tipo" Binding="{Binding Type}" Width="1.2*"/>
+                <DataGridTextColumn Header="Funda" Binding="{Binding CaseStockKindLabel}" Width="1*"/>
                 <DataGridTextColumn Header="Cantidad" Binding="{Binding SignedQuantity}" Width="0.8*"/>
                 <DataGridTextColumn Header="Nota" Binding="{Binding Note}" Width="2.5*"/>
             </DataGrid.Columns>

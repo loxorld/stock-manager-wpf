@@ -282,6 +282,29 @@
                                     </StackPanel>
                                 </materialDesign:Card>
 
+                                <materialDesign:Card Margin="0,0,10,10" Padding="10"
+                                                     Visibility="{Binding IsCaseDetail, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <materialDesign:PackIcon Kind="GenderFemale" Width="16" Height="16" Opacity="0.7"/>
+                                            <TextBlock Text="Stock mujer" Margin="6,0,0,0" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DetailCaseStockWomen}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+                                <materialDesign:Card Margin="0,0,10,10" Padding="10"
+                                                     Visibility="{Binding IsCaseDetail, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <materialDesign:PackIcon Kind="GenderMale" Width="16" Height="16" Opacity="0.7"/>
+                                            <TextBlock Text="Stock hombre" Margin="6,0,0,0" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DetailCaseStockMen}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+
                                 <materialDesign:Card Margin="0,0,10,10" Padding="10">
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
