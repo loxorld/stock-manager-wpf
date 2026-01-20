@@ -67,6 +67,7 @@ public partial class StockViewModel : ObservableObject
     
     [ObservableProperty] private string detailActive = "-";
     [ObservableProperty] private bool isCaseDetail;
+    [ObservableProperty] private bool isGenderedCaseDetail;
 
     [ObservableProperty] private int detailCaseStockWomen;
     [ObservableProperty] private int detailCaseStockMen;
@@ -158,6 +159,7 @@ public partial class StockViewModel : ObservableObject
             
             DetailActive = "-";
             IsCaseDetail = false;
+            IsGenderedCaseDetail = false;
             DetailStock = 0;
             DetailCaseStockWomen = 0;
             DetailCaseStockMen = 0;
@@ -186,6 +188,8 @@ public partial class StockViewModel : ObservableObject
                 DetailActive = detail.Active ? "Activo" : "Inactivo";
                 DetailMargin = DetailPrice - DetailCost;
                 IsCaseDetail = detail.Category == ProductCategory.Case;
+                IsGenderedCaseDetail = detail.Category == ProductCategory.Case
+                    && detail.CaseType != CaseType.Transparent;
                 DetailStock = detail.Stock;
                 DetailCaseStockWomen = detail.CaseStockWomen;
                 DetailCaseStockMen = detail.CaseStockMen;
@@ -222,7 +226,9 @@ public partial class StockViewModel : ObservableObject
         try
         {
             var caseStockKind = GetQuickCaseStockKindOrNull();
-            if (SelectedItem.CategoryValue == ProductCategory.Case && caseStockKind is null)
+            if (SelectedItem.CategoryValue == ProductCategory.Case
+                && SelectedItem.CaseType != CaseType.Transparent
+                && caseStockKind is null)
                 return;
 
             await _movementService.RegisterAsync(new RegisterMovementRequest
@@ -251,7 +257,9 @@ public partial class StockViewModel : ObservableObject
         try
         {
             var caseStockKind = GetQuickCaseStockKindOrNull();
-            if (SelectedItem.CategoryValue == ProductCategory.Case && caseStockKind is null)
+            if (SelectedItem.CategoryValue == ProductCategory.Case
+                && SelectedItem.CaseType != CaseType.Transparent
+                && caseStockKind is null)
                 return;
             await _movementService.RegisterAsync(new RegisterMovementRequest
             {
@@ -278,20 +286,16 @@ public partial class StockViewModel : ObservableObject
         if (SelectedItem?.CategoryValue != ProductCategory.Case)
             return null;
 
-        var result = MessageBox.Show(
-            "Seleccioná el tipo de funda para la acción rápida:\n\n" +
-            "Sí = Funda de mujer\nNo = Funda de hombre",
-            "Tipo de funda",
-            MessageBoxButton.YesNoCancel,
-            MessageBoxImage.Question
-        );
+        if (SelectedItem.CaseType == CaseType.Transparent)
+            return null;
 
-        return result switch
+        var dialog = new StockManager.Views.CaseStockKindWindow
         {
-            MessageBoxResult.Yes => CaseStockKind.Women,
-            MessageBoxResult.No => CaseStockKind.Men,
-            _ => null
+            Owner = System.Windows.Application.Current?.MainWindow
         };
+
+        var result = dialog.ShowDialog();
+        return result == true ? dialog.SelectedCaseStockKind : null;
     }
 
 

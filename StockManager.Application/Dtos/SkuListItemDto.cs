@@ -8,6 +8,7 @@ public class SkuListItemDto
     public string Name { get; set; } = "";
     public string Category { get; set; } = "";
     public ProductCategory CategoryValue { get; set; }
+    public CaseType? CaseType { get; set; }
 
     public int Stock { get; set; }
     public int CaseStockWomen { get; set; }

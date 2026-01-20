@@ -63,7 +63,7 @@
 
         <!-- Tipo de funda -->
         <Grid Grid.Row="3" Margin="0,0,0,10"
-              Visibility="{Binding IsCaseSku, Converter={StaticResource BooleanToVisibilityConverter}}">
+              Visibility="{Binding RequiresCaseStockKind, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="90"/>
                 <ColumnDefinition Width="*"/>
@@ -72,11 +72,29 @@
             <TextBlock Text="Funda"
                        VerticalAlignment="Center"/>
 
-            <ComboBox Grid.Column="1"
-                      Width="260"
-                      ItemsSource="{Binding CaseStockKindOptions}"
-                      DisplayMemberPath="Display"
-                      SelectedItem="{Binding SelectedCaseStockKindOption, Mode=TwoWay}"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <RadioButton Content="Mujer"
+                             GroupName="CaseStockKind"
+                             IsChecked="{Binding IsCaseStockKindWoman, Mode=TwoWay}"/>
+                <RadioButton Content="Hombre"
+                             GroupName="CaseStockKind"
+                             Margin="16,0,0,0"
+                             IsChecked="{Binding IsCaseStockKindMan, Mode=TwoWay}"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="3" Margin="0,0,0,10"
+              Visibility="{Binding ShowTransparentCaseInfo, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Funda"
+                       VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="1"
+                       Text="Transparente (sin género)"
+                       VerticalAlignment="Center"/>
         </Grid>
 
 

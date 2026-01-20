@@ -283,7 +283,7 @@
                                 </materialDesign:Card>
 
                                 <materialDesign:Card Margin="0,0,10,10" Padding="10"
-                                                     Visibility="{Binding IsCaseDetail, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                     Visibility="{Binding IsGenderedDetail, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                             <materialDesign:PackIcon Kind="GenderFemale" Width="16" Height="16" Opacity="0.7"/>
@@ -294,7 +294,7 @@
                                 </materialDesign:Card>
 
                                 <materialDesign:Card Margin="0,0,10,10" Padding="10"
-                                                     Visibility="{Binding IsCaseDetail, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                     Visibility="{Binding IsGenderedDetail, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                             <materialDesign:PackIcon Kind="GenderMale" Width="16" Height="16" Opacity="0.7"/>

@@ -16,6 +16,9 @@ public partial class RegisterMovementViewModel : ObservableObject
 
     public int SkuId { get; }
     public bool IsCaseSku { get; }
+    public CaseType? CaseType { get; }
+    public bool RequiresCaseStockKind => IsCaseSku && CaseType == StockManager.Domain.Enums.CaseType.Transparent;
+    public bool ShowTransparentCaseInfo => IsCaseSku && CaseType == StockManager.Domain.Enums.CaseType.Transparent;
 
     [ObservableProperty]
     private string skuName;
@@ -43,14 +46,6 @@ public partial class RegisterMovementViewModel : ObservableObject
             new(PaymentMethod.Cash, "Efectivo"),
             new(PaymentMethod.MercadoPago, "MercadoPago / Tarjeta")
         };
-
-    public IReadOnlyList<CaseStockKindOption> CaseStockKindOptions { get; } =
-        new List<CaseStockKindOption>
-        {
-            new(CaseStockKind.Women, "Funda de mujer"),
-            new(CaseStockKind.Men, "Funda de hombre")
-        };
-
     // Lo que selecciona el ComboBox
     private MovementTypeOption selectedTypeOption = null!;
     public MovementTypeOption SelectedTypeOption
@@ -73,11 +68,39 @@ public partial class RegisterMovementViewModel : ObservableObject
         set => SetProperty(ref selectedPaymentMethodOption, value);
     }
 
-    private CaseStockKindOption? selectedCaseStockKindOption;
-    public CaseStockKindOption? SelectedCaseStockKindOption
+    [ObservableProperty]
+    private CaseStockKind? selectedCaseStockKind;
+
+    public bool IsCaseStockKindWoman
     {
-        get => selectedCaseStockKindOption;
-        set => SetProperty(ref selectedCaseStockKindOption, value);
+        get => SelectedCaseStockKind == CaseStockKind.Women;
+        set
+        {
+            if (value)
+            {
+                SelectedCaseStockKind = CaseStockKind.Women;
+            }
+            else if (SelectedCaseStockKind == CaseStockKind.Women)
+            {
+                SelectedCaseStockKind = null;
+            }
+        }
+    }
+
+    public bool IsCaseStockKindMan
+    {
+        get => SelectedCaseStockKind == CaseStockKind.Men;
+        set
+        {
+            if (value)
+            {
+                SelectedCaseStockKind = CaseStockKind.Men;
+            }
+            else if (SelectedCaseStockKind == CaseStockKind.Men)
+            {
+                SelectedCaseStockKind = null;
+            }
+        }
     }
 
     // string para permitir "-" en ajuste
@@ -94,17 +117,18 @@ public partial class RegisterMovementViewModel : ObservableObject
         IStockMovementService service,
         int skuId,
         string skuName,
-        ProductCategory category)
+        ProductCategory category,
+        CaseType? caseType)
     {
         _service = service;
         SkuId = skuId;
         SkuName = skuName;
         IsCaseSku = category == ProductCategory.Case;
+        CaseType = caseType;
 
         // Default: Venta
         SelectedTypeOption = MovementTypeOptions.First(x => x.Value == Type);
         SelectedPaymentMethodOption = PaymentMethodOptions.First(x => x.Value == PaymentMethod.Cash);
-        SelectedCaseStockKindOption = CaseStockKindOptions.FirstOrDefault();
     }
 
     // Si Type cambia por algún motivo, mantenemos sincronizado el combo.
@@ -115,6 +139,12 @@ public partial class RegisterMovementViewModel : ObservableObject
             selectedTypeOption = opt; // set directo para evitar loop
         OnPropertyChanged(nameof(SelectedTypeOption));
         IsSale = value == StockMovementType.Sale;
+    }
+
+    partial void OnSelectedCaseStockKindChanged(CaseStockKind? value)
+    {
+        OnPropertyChanged(nameof(IsCaseStockKindWoman));
+        OnPropertyChanged(nameof(IsCaseStockKindMan));
     }
 
     [RelayCommand]
@@ -171,15 +201,15 @@ public partial class RegisterMovementViewModel : ObservableObject
                     : null
             };
 
-            if (IsCaseSku)
+            if (RequiresCaseStockKind)
             {
-                if (SelectedCaseStockKindOption == null)
+                if (SelectedCaseStockKind == null)
                 {
                     ErrorMessage = "Seleccioná si la funda es de mujer u hombre.";
                     return;
                 }
 
-                req.CaseStockKind = SelectedCaseStockKindOption.Value;
+                req.CaseStockKind = SelectedCaseStockKind.Value;
             }
 
             if (Type == StockMovementType.Adjustment)
@@ -205,5 +235,6 @@ public partial class RegisterMovementViewModel : ObservableObject
         }
     }
 
-    
+
+
 }

@@ -47,6 +47,7 @@ public class SkuQueryService : ISkuQueryService
                 Name = x.Name,
                 Category = x.Category.ToString(),
                 CategoryValue = x.Category,
+                CaseType = x.CaseType,
                 Stock = x.Stock,
                 CaseStockWomen = x.CaseStockWomen,
                 CaseStockMen = x.CaseStockMen,

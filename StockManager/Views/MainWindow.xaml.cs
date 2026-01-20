@@ -43,7 +43,8 @@ public partial class MainWindow : Window
             _sp,
             _vm.SelectedItem.Id,
             _vm.SelectedItem.Name,
-            _vm.SelectedItem.CategoryValue
+            _vm.SelectedItem.CategoryValue,
+            _vm.SelectedItem.CaseType
         );
 
         var win = new RegisterMovementWindow(mvm)

@@ -35,9 +35,17 @@ public class StockMovementService : IStockMovementService
         if (sku == null)
             throw new InvalidOperationException("SKU inexistente.");
 
-        if (sku.Category == ProductCategory.Case && request.CaseStockKind is null)
+        var isTransparentCase = sku.Category == ProductCategory.Case && sku.CaseType == CaseType.Transparent;
+
+        if (sku.Category == ProductCategory.Case && !isTransparentCase && request.CaseStockKind is null)
             throw new InvalidOperationException("Para fundas, se debe indicar si es de mujer u hombre.");
 
+
+        if (sku.Category != ProductCategory.Case && request.CaseStockKind is not null)
+            throw new InvalidOperationException("Este SKU no es una funda.");
+
+        if (isTransparentCase && request.CaseStockKind is not null)
+            throw new InvalidOperationException("Las fundas transparentes no llevan género.");
 
         // Calcular signedQty real a aplicar al stock
         int signedQty = request.Type switch
@@ -49,7 +57,7 @@ public class StockMovementService : IStockMovementService
             _ => throw new InvalidOperationException("Tipo de movimiento inválido.")
         };
 
-        if (sku.Category == ProductCategory.Case)
+        if (sku.Category == ProductCategory.Case && !isTransparentCase)
         {
             var newCaseStock = request.CaseStockKind == CaseStockKind.Women
                 ? sku.CaseStockWomen + signedQty
@@ -67,8 +75,7 @@ public class StockMovementService : IStockMovementService
         }
         else
         {
-            if (request.CaseStockKind is not null)
-                throw new InvalidOperationException("Este SKU no es una funda.");
+            
 
             var newStock = sku.Stock + signedQty;
             if (newStock < 0)
