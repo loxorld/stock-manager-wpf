@@ -6,10 +6,16 @@ namespace StockManager.Views;
 public partial class CaseStockKindWindow : Window
 {
     public CaseStockKind? SelectedCaseStockKind { get; private set; }
+    public PaymentMethod? SelectedPaymentMethod { get; private set; }
+    public bool ShowPaymentMethodSelection { get; }
 
-    public CaseStockKindWindow()
+    public CaseStockKindWindow(bool showPaymentMethodSelection = false)
     {
+        ShowPaymentMethodSelection = showPaymentMethodSelection;
         InitializeComponent();
+        PaymentMethodPanel.Visibility = ShowPaymentMethodSelection
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private void Ok_Click(object sender, RoutedEventArgs e)
@@ -30,6 +36,27 @@ public partial class CaseStockKindWindow : Window
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
             return;
+        }
+
+        if (ShowPaymentMethodSelection)
+        {
+            if (CashRadio.IsChecked == true)
+            {
+                SelectedPaymentMethod = PaymentMethod.Cash;
+            }
+            else if (MercadoPagoRadio.IsChecked == true)
+            {
+                SelectedPaymentMethod = PaymentMethod.MercadoPago;
+            }
+            else
+            {
+                MessageBox.Show(
+                    "Seleccioná el medio de pago para continuar.",
+                    "Medio de pago",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
         }
 
         DialogResult = true;

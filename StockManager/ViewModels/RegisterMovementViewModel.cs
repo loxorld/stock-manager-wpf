@@ -17,7 +17,7 @@ public partial class RegisterMovementViewModel : ObservableObject
     public int SkuId { get; }
     public bool IsCaseSku { get; }
     public CaseType? CaseType { get; }
-    public bool RequiresCaseStockKind => IsCaseSku && CaseType == StockManager.Domain.Enums.CaseType.Transparent;
+    public bool RequiresCaseStockKind => IsCaseSku && CaseType != StockManager.Domain.Enums.CaseType.Transparent;
     public bool ShowTransparentCaseInfo => IsCaseSku && CaseType == StockManager.Domain.Enums.CaseType.Transparent;
 
     [ObservableProperty]
@@ -113,6 +113,14 @@ public partial class RegisterMovementViewModel : ObservableObject
     [ObservableProperty]
     private string? errorMessage;
 
+    public RegisterMovementViewModel(
+       IStockMovementService service,
+       int skuId,
+       string skuName,
+       ProductCategory category)
+       : this(service, skuId, skuName, category, null)
+    {
+    }
     public RegisterMovementViewModel(
         IStockMovementService service,
         int skuId,

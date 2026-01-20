@@ -12,6 +12,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0"
@@ -30,7 +32,18 @@
                          GroupName="CaseStockKind"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel x:Name="PaymentMethodPanel" Grid.Row="2" Orientation="Vertical" Margin="0,0,0,16" Visibility="Collapsed">
+            <TextBlock Text="Medio de pago" Margin="0,0,0,6"/>
+            <RadioButton x:Name="CashRadio"
+                         Content="Efectivo"
+                         GroupName="PaymentMethod"
+                         Margin="0,0,0,6"/>
+            <RadioButton x:Name="MercadoPagoRadio"
+                         Content="MercadoPago / Tarjeta"
+                         GroupName="PaymentMethod"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Cancelar" Width="90" Margin="0,0,8,0" Click="Cancel_Click"/>
             <Button Content="Aceptar" Width="90" Click="Ok_Click"/>
         </StackPanel>

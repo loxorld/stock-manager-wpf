@@ -39,13 +39,33 @@ public partial class MainWindow : Window
             return;
         }
 
-        var mvm = ActivatorUtilities.CreateInstance<RegisterMovementViewModel>(
-            _sp,
-            _vm.SelectedItem.Id,
-            _vm.SelectedItem.Name,
-            _vm.SelectedItem.CategoryValue,
-            _vm.SelectedItem.CaseType
-        );
+        RegisterMovementViewModel mvm;
+        if (_vm.SelectedItem.CategoryValue == StockManager.Domain.Enums.ProductCategory.Case)
+        {
+            var caseType = _vm.SelectedItem.CaseType;
+            if (caseType == null)
+            {
+                MessageBox.Show("El SKU de funda no tiene tipo asignado.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            mvm = ActivatorUtilities.CreateInstance<RegisterMovementViewModel>(
+                _sp,
+                _vm.SelectedItem.Id,
+                _vm.SelectedItem.Name,
+                _vm.SelectedItem.CategoryValue,
+                caseType.Value
+            );
+        }
+        else
+        {
+            mvm = ActivatorUtilities.CreateInstance<RegisterMovementViewModel>(
+                _sp,
+                _vm.SelectedItem.Id,
+                _vm.SelectedItem.Name,
+                _vm.SelectedItem.CategoryValue
+            );
+        }
 
         var win = new RegisterMovementWindow(mvm)
         {

@@ -256,7 +256,9 @@ public partial class StockViewModel : ObservableObject
 
         try
         {
-            var caseStockKind = GetQuickCaseStockKindOrNull();
+            var quickSaleSelection = GetQuickSaleSelectionOrNull();
+            var caseStockKind = quickSaleSelection?.CaseStockKind;
+            var paymentMethod = quickSaleSelection?.PaymentMethod ?? PaymentMethod.Cash;
             if (SelectedItem.CategoryValue == ProductCategory.Case
                 && SelectedItem.CaseType != CaseType.Transparent
                 && caseStockKind is null)
@@ -266,7 +268,7 @@ public partial class StockViewModel : ObservableObject
                 SkuId = SelectedItem.Id,
                 Type = StockMovementType.Sale,
                 Quantity = 1,
-                PaymentMethod = PaymentMethod.Cash,
+                PaymentMethod = paymentMethod,
                 CaseStockKind = caseStockKind,
                 Note = "Venta rápida (-1)"
             });
@@ -279,6 +281,30 @@ public partial class StockViewModel : ObservableObject
             StockManager.Views.UiError.Show(ex, "No se pudo registrar la venta");
         }
     }
+
+    private QuickSaleSelection? GetQuickSaleSelectionOrNull()
+    {
+        if (SelectedItem?.CategoryValue != ProductCategory.Case)
+            return null;
+
+        if (SelectedItem.CaseType == CaseType.Transparent)
+            return null;
+
+        var dialog = new StockManager.Views.CaseStockKindWindow(showPaymentMethodSelection: true)
+        {
+            Owner = System.Windows.Application.Current?.MainWindow
+        };
+
+        var result = dialog.ShowDialog();
+        if (result != true)
+            return null;
+
+        return dialog.SelectedCaseStockKind == null || dialog.SelectedPaymentMethod == null
+            ? null
+            : new QuickSaleSelection(dialog.SelectedCaseStockKind.Value, dialog.SelectedPaymentMethod.Value);
+    }
+
+    private sealed record QuickSaleSelection(CaseStockKind CaseStockKind, PaymentMethod PaymentMethod);
 
 
     private CaseStockKind? GetQuickCaseStockKindOrNull()
