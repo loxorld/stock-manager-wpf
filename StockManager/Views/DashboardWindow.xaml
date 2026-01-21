@@ -5,6 +5,7 @@
         Title="Dashboard"
         Height="600" Width="980"
         WindowStartupLocation="CenterOwner"
+        WindowState="Maximized"
         FontSize="13">
     <Window.Resources>
         <ResourceDictionary>

@@ -6,6 +6,7 @@
         Title="Stock Manager"
         Height="540" Width="1040"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         FontSize="13">
 
     <!-- Atajos -->
