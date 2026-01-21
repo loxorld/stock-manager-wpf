@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using StockManager.Application.Dtos;
 using StockManager.Application.Services;
 using StockManager.Domain.Enums;
+using System.Linq;
 using System.Collections.ObjectModel;
 using System.Windows;
 
@@ -21,6 +22,9 @@ public partial class StockViewModel : ObservableObject
     [ObservableProperty] private string searchText = "";
     [ObservableProperty] private bool isLoading;
     [ObservableProperty] private bool isEmpty = true;
+    [ObservableProperty] private decimal totalCost;
+    [ObservableProperty] private decimal totalPrice;
+    [ObservableProperty] private decimal totalMargin;
 
     // ====== Filtros ======
     public IReadOnlyList<CategoryFilterOption> CategoryOptions { get; } =
@@ -90,7 +94,11 @@ public partial class StockViewModel : ObservableObject
         _movementQueryService = movementQueryService;
 
         selectedCategoryOption = CategoryOptions[0]; // "Todas"
-        Items.CollectionChanged += (_, _) => UpdateEmptyState();
+        Items.CollectionChanged += (_, _) =>
+        {
+            UpdateEmptyState();
+            UpdateTotals();
+        };
     }
 
     // Auto-búsqueda
@@ -139,6 +147,7 @@ public partial class StockViewModel : ObservableObject
             //  restaurar selección
             RestoreSelection(selectedId);
             UpdateEmptyState();
+            UpdateTotals();
         }
         finally
         {
@@ -260,7 +269,10 @@ public partial class StockViewModel : ObservableObject
         {
             var quickSaleSelection = GetQuickSaleSelectionOrNull();
             var caseStockKind = quickSaleSelection?.CaseStockKind;
-            var paymentMethod = quickSaleSelection?.PaymentMethod ?? PaymentMethod.Cash;
+            var paymentMethod = quickSaleSelection?.PaymentMethod
+                ?? GetQuickSalePaymentMethodOrNull();
+            if (paymentMethod is null)
+                return;
             if (SelectedItem.CategoryValue == ProductCategory.Case
                 && SelectedItem.CaseType != CaseType.Transparent
                 && caseStockKind is null)
@@ -306,6 +318,24 @@ public partial class StockViewModel : ObservableObject
             : new QuickSaleSelection(dialog.SelectedCaseStockKind.Value, dialog.SelectedPaymentMethod.Value);
     }
 
+    private PaymentMethod? GetQuickSalePaymentMethodOrNull()
+    {
+        if (SelectedItem == null)
+            return null;
+
+        if (SelectedItem.CategoryValue == ProductCategory.Case
+            && SelectedItem.CaseType != CaseType.Transparent)
+            return null;
+
+        var dialog = new StockManager.Views.PaymentMethodWindow
+        {
+            Owner = System.Windows.Application.Current?.MainWindow
+        };
+
+        var result = dialog.ShowDialog();
+        return result == true ? dialog.SelectedPaymentMethod : null;
+    }
+
     private sealed record QuickSaleSelection(CaseStockKind CaseStockKind, PaymentMethod PaymentMethod);
 
 
@@ -339,5 +369,15 @@ public partial class StockViewModel : ObservableObject
     private void UpdateEmptyState()
     {
         IsEmpty = Items.Count == 0;
+    }
+
+    private void UpdateTotals()
+    {
+        var totalCostValue = Items.Sum(item => item.Cost * item.Stock);
+        var totalPriceValue = Items.Sum(item => item.Price * item.Stock);
+
+        TotalCost = totalCostValue;
+        TotalPrice = totalPriceValue;
+        TotalMargin = totalPriceValue - totalCostValue;
     }
 }

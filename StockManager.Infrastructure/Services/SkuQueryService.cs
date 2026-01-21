@@ -46,6 +46,7 @@ public class SkuQueryService(StockDbContext db) : ISkuQueryService
                 Stock = x.Stock,
                 CaseStockWomen = x.CaseStockWomen,
                 CaseStockMen = x.CaseStockMen,
+                Cost = x.Cost,
                 Price = x.Price
             })
             .ToListAsync();

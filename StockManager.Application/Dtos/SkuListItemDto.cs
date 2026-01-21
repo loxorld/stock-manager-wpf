@@ -13,6 +13,7 @@ public class SkuListItemDto
     public int Stock { get; set; }
     public int CaseStockWomen { get; set; }
     public int CaseStockMen { get; set; }
+    public decimal Cost { get; set; }
     public decimal Price { get; set; }
 }
 

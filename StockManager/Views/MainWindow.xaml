@@ -24,6 +24,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -154,8 +155,44 @@
             </DockPanel>
         </materialDesign:Card>
 
+        <!-- Totals -->
+        <materialDesign:Card Grid.Row="2" Padding="12" Margin="0,0,0,12">
+            <WrapPanel ItemWidth="210" ItemHeight="70">
+                <materialDesign:Card Margin="0,0,10,0" Padding="10">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <materialDesign:PackIcon Kind="Cash" Width="16" Height="16" Opacity="0.7"/>
+                            <TextBlock Text="Total costo" Margin="6,0,0,0" Opacity="0.7"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding TotalCost, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <materialDesign:Card Margin="0,0,10,0" Padding="10">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <materialDesign:PackIcon Kind="CurrencyUsd" Width="16" Height="16" Opacity="0.7"/>
+                            <TextBlock Text="Total precio" Margin="6,0,0,0" Opacity="0.7"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding TotalPrice, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <materialDesign:Card Padding="10">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <materialDesign:PackIcon Kind="ChartLine" Width="16" Height="16" Opacity="0.7"/>
+                            <TextBlock Text="Total margen" Margin="6,0,0,0" Opacity="0.7"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding TotalMargin, StringFormat={}{0:C}}" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </materialDesign:Card>
+            </WrapPanel>
+        </materialDesign:Card>
+
+
         <!-- Content -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>

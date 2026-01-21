@@ -106,7 +106,7 @@
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
@@ -195,7 +195,7 @@
             </UniformGrid>
 
             <!-- Chart + Top products -->
-            <Grid Grid.Row="1" Margin="0,0,0,12">
+            <Grid Grid.Row="1" Margin="0,0,0,12" MinHeight="200">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="*"/>
@@ -323,7 +323,7 @@
 
 
             <!-- Tables -->
-            <materialDesign:Card Grid.Row="2" Padding="12">
+            <materialDesign:Card Grid.Row="2" Padding="12" MinHeight="220">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
