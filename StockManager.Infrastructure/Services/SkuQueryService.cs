@@ -6,14 +6,9 @@ using StockManager.Domain.Enums;
 
 namespace StockManager.Infrastructure.Services;
 
-public class SkuQueryService : ISkuQueryService
+public class SkuQueryService(StockDbContext db) : ISkuQueryService
 {
-    private readonly StockDbContext _db;
-
-    public SkuQueryService(StockDbContext db)
-    {
-        _db = db;
-    }
+    private readonly StockDbContext _db = db;
 
     public async Task<List<SkuListItemDto>> GetAllAsync(
         string? searchText = null,

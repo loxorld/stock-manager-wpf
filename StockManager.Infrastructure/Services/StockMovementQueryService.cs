@@ -5,14 +5,9 @@ using StockManager.Infrastructure.Persistence;
 
 namespace StockManager.Infrastructure.Services;
 
-public class StockMovementQueryService : IStockMovementQueryService
+public class StockMovementQueryService(StockDbContext db) : IStockMovementQueryService
 {
-    private readonly StockDbContext _db;
-
-    public StockMovementQueryService(StockDbContext db)
-    {
-        _db = db;
-    }
+    private readonly StockDbContext _db = db;
 
     public async Task<List<StockMovementListItemDto>> GetBySkuAsync(int skuId)
     {

@@ -7,14 +7,9 @@ using StockManager.Infrastructure.Persistence;
 
 namespace StockManager.Infrastructure.Services;
 
-public class StockMovementService : IStockMovementService
+public class StockMovementService(StockDbContext db) : IStockMovementService
 {
-    private readonly StockDbContext _db;
-
-    public StockMovementService(StockDbContext db)
-    {
-        _db = db;
-    }
+    private readonly StockDbContext _db = db;
 
     public async Task RegisterAsync(RegisterMovementRequest request)
     {
@@ -39,7 +34,6 @@ public class StockMovementService : IStockMovementService
 
         if (sku.Category == ProductCategory.Case && !isTransparentCase && request.CaseStockKind is null)
             throw new InvalidOperationException("Para fundas, se debe indicar si es de mujer u hombre.");
-
 
         if (sku.Category != ProductCategory.Case && request.CaseStockKind is not null)
             throw new InvalidOperationException("Este SKU no es una funda.");

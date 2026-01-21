@@ -24,12 +24,14 @@ public partial class StockViewModel : ObservableObject
 
     // ====== Filtros ======
     public IReadOnlyList<CategoryFilterOption> CategoryOptions { get; } =
-        new List<CategoryFilterOption>(
-            new[] { new CategoryFilterOption(null, "Todas") }
-            .Concat(Enum.GetValues(typeof(ProductCategory))
-                .Cast<ProductCategory>()
-                .Select(c => new CategoryFilterOption(c, c.ToString())))
-        );
+        new List<CategoryFilterOption>
+        {
+            new CategoryFilterOption(null, "Todas")
+        }
+        .Concat(Enum.GetValues(typeof(ProductCategory))
+            .Cast<ProductCategory>()
+            .Select(c => new CategoryFilterOption(c, c.ToString())))
+        .ToList();
 
     private CategoryFilterOption selectedCategoryOption;
     public CategoryFilterOption SelectedCategoryOption

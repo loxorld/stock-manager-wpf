@@ -31,21 +31,19 @@ public partial class RegisterMovementViewModel : ObservableObject
     private bool isSale = true;
 
     // Opciones para el ComboBox (texto lindo + valor real)
-    public IReadOnlyList<MovementTypeOption> MovementTypeOptions { get; } =
-        new List<MovementTypeOption>
-        {
-            new(StockMovementType.Sale, "Venta"),
-            new(StockMovementType.PurchaseEntry, "Compra"),
-            new(StockMovementType.Adjustment, "Ajuste de stock (+ / -)"),
-            new(StockMovementType.Shrinkage, "Pérdida / merma")
-        };
+    public IReadOnlyList<MovementTypeOption> MovementTypeOptions { get; } = new List<MovementTypeOption>
+    {
+        new(StockMovementType.Sale, "Venta"),
+        new(StockMovementType.PurchaseEntry, "Compra"),
+        new(StockMovementType.Adjustment, "Ajuste de stock (+ / -)"),
+        new(StockMovementType.Shrinkage, "Pérdida / merma")
+    };
 
-    public IReadOnlyList<PaymentMethodOption> PaymentMethodOptions { get; } =
-        new List<PaymentMethodOption>
-        {
-            new(PaymentMethod.Cash, "Efectivo"),
-            new(PaymentMethod.MercadoPago, "MercadoPago / Tarjeta")
-        };
+    public IReadOnlyList<PaymentMethodOption> PaymentMethodOptions { get; } = new List<PaymentMethodOption>
+    {
+        new(PaymentMethod.Cash, "Efectivo"),
+        new(PaymentMethod.MercadoPago, "MercadoPago / Tarjeta")
+    };
     // Lo que selecciona el ComboBox
     private MovementTypeOption selectedTypeOption = null!;
     public MovementTypeOption SelectedTypeOption

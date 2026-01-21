@@ -7,14 +7,9 @@ using StockManager.Infrastructure.Persistence;
 
 namespace StockManager.Infrastructure.Services;
 
-public class SkuCommandService : ISkuCommandService
+public class SkuCommandService(StockDbContext db) : ISkuCommandService
 {
-    private readonly StockDbContext _db;
-
-    public SkuCommandService(StockDbContext db)
-    {
-        _db = db;
-    }
+    private readonly StockDbContext _db = db;
 
     public async Task<int> CreateAsync(UpsertSkuRequest r)
     {
@@ -45,11 +40,12 @@ public class SkuCommandService : ISkuCommandService
 
     public async Task UpdateAsync(UpsertSkuRequest r)
     {
-        if (r.Id is null) throw new ArgumentException("Id requerido para actualizar.");
+        if (r.Id is null)
+            throw new ArgumentException("Id requerido para actualizar.");
         Validate(r);
 
-        var sku = await _db.Skus.FirstOrDefaultAsync(x => x.Id == r.Id.Value);
-        if (sku == null) throw new InvalidOperationException("SKU inexistente.");
+        var sku = await _db.Skus.FirstOrDefaultAsync(x => x.Id == r.Id.Value)
+            ?? throw new InvalidOperationException("SKU inexistente.");
 
         sku.Name = r.Name.Trim();
         sku.Category = r.Category;
@@ -62,8 +58,6 @@ public class SkuCommandService : ISkuCommandService
             sku.CaseStockWomen = 0;
             sku.CaseStockMen = 0;
         }
-
-
 
         sku.Cost = r.Cost;
         sku.Price = r.Price;
@@ -99,9 +93,8 @@ public class SkuCommandService : ISkuCommandService
 
     public async Task DeleteAsync(int id)
     {
-        var sku = await _db.Skus.FirstOrDefaultAsync(x => x.Id == id);
-        if (sku == null)
-            throw new InvalidOperationException("SKU inexistente.");
+        var sku = await _db.Skus.FirstOrDefaultAsync(x => x.Id == id)
+            ?? throw new InvalidOperationException("SKU inexistente.");
 
         if (sku.Stock != 0)
             throw new InvalidOperationException(
