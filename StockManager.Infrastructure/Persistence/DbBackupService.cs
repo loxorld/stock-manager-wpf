@@ -36,7 +36,7 @@ public static class DbBackupService
             // Limpieza: dejar solo últimos 30 backups
             var files = new DirectoryInfo(backupDir)
                 .GetFiles("stockmanager_*.db")
-                .OrderByDescending(f => f.CreationTimeUtc)
+                .OrderByDescending(f => f.Name, StringComparer.Ordinal)
                 .Skip(30);
 
             foreach (var f in files)

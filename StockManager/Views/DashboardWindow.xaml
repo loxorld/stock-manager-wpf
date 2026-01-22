@@ -343,7 +343,8 @@
                               CanUserAddRows="False"
                               HeadersVisibility="Column"
                               GridLinesVisibility="None"
-                              RowHeight="34"
+                              RowHeight="40"
+                              RowHeaderWidth="0"
                               ScrollViewer.VerticalScrollBarVisibility="Auto"
                               ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               EnableRowVirtualization="True"
@@ -362,6 +363,22 @@
                                                 Binding="{Binding Total, StringFormat={}{0:C}}"
                                                 Width="120"/>
                             <DataGridTextColumn Header="Nota" Binding="{Binding Note}" Width="220"/>
+                            <DataGridTemplateColumn Header="Acciones" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Borrar"
+                                                Padding="12,4"
+                                                MinWidth="80"
+                                                MinHeight="26"
+                                                VerticalAlignment="Center"
+                                                Background="#D32F2F"
+                                                Foreground="White"
+                                                BorderBrush="#B71C1C"
+                                                Command="{Binding DataContext.DeleteSaleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

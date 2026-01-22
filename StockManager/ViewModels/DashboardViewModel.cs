@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Windows;
 
 
 namespace StockManager.ViewModels;
@@ -22,6 +23,7 @@ public enum DashboardPeriod
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly IDashboardQueryService _dashboard;
+    private readonly IStockMovementService _stockMovementService;
 
     [ObservableProperty] private bool isLoading;
 
@@ -53,15 +55,44 @@ public partial class DashboardViewModel : ObservableObject
     public ObservableCollection<DashboardSaleHistoryItemDto> SalesHistory { get; } = new();
 
 
-    public DashboardViewModel(IDashboardQueryService dashboard)
+    public DashboardViewModel(IDashboardQueryService dashboard, IStockMovementService stockMovementService)
     {
         _dashboard = dashboard;
+        _stockMovementService = stockMovementService;
 
         var today = DateTime.Today;
         FromDate = today;
         ToDate = today;
         HasDailySales = true;
     }
+
+    [RelayCommand]
+    public async Task DeleteSaleAsync(DashboardSaleHistoryItemDto? sale)
+    {
+        if (sale == null)
+            return;
+
+        var confirm = MessageBox.Show(
+            $"¿Querés eliminar la venta de \"{sale.SkuName}\" por {sale.Quantity} unidad(es)?\n" +
+            "Esto devolverá el stock y eliminará el movimiento.",
+            "Confirmar eliminación de venta",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (confirm != MessageBoxResult.Yes)
+            return;
+
+        try
+        {
+            await _stockMovementService.DeleteSaleAsync(sale.Id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            UiError.Show(ex, "No se pudo eliminar la venta");
+        }
+    }
+
 
     [RelayCommand]
     public async Task ApplyRangeAsync()

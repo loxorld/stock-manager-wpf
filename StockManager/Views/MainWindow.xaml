@@ -75,6 +75,16 @@
                     </StackPanel>
                 </Button>
 
+                <Button Click="BulkPriceUpdate_Click"
+                        ToolTip="Actualizar precios por tipo"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="TagMultiple" Width="18" Height="18" Margin="0,0,8,0"/>
+                        <TextBlock Text="Actualizar precios"/>
+                    </StackPanel>
+                </Button>
+
                 <!-- Eliminar SKU  -->
                 <Button Click="DeleteSku_Click"
                         ToolTip="Eliminar SKU seleccionado"

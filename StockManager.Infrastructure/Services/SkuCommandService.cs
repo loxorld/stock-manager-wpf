@@ -105,5 +105,52 @@ public class SkuCommandService(StockDbContext db) : ISkuCommandService
         await _db.SaveChangesAsync();
     }
 
+    public async Task<int> UpdatePricingByTypeAsync(
+        ProductCategory category,
+        CaseType? caseType,
+        ProtectorType? protectorType,
+        decimal? price,
+        decimal? cost)
+    {
+        if (price is null && cost is null)
+            throw new ArgumentException("Debe indicar precio y/o costo.");
+
+        if (price is < 0)
+            throw new ArgumentException("El precio no puede ser negativo.");
+
+        if (cost is < 0)
+            throw new ArgumentException("El costo no puede ser negativo.");
+
+        if (category == ProductCategory.Case && caseType is null)
+            throw new ArgumentException("El tipo de funda es obligatorio.");
+
+        if (category == ProductCategory.ScreenProtector && protectorType is null)
+            throw new ArgumentException("El tipo de templado es obligatorio.");
+
+        if (category != ProductCategory.Case && category != ProductCategory.ScreenProtector)
+            throw new ArgumentException("Solo se permite actualizar fundas o templados.");
+
+        var query = _db.Skus.Where(x => x.Category == category);
+
+        if (category == ProductCategory.Case)
+            query = query.Where(x => x.CaseType == caseType);
+        else
+            query = query.Where(x => x.ProtectorType == protectorType);
+
+        var skus = await query.ToListAsync();
+        foreach (var sku in skus)
+        {
+            if (price.HasValue)
+                sku.Price = price.Value;
+
+            if (cost.HasValue)
+                sku.Cost = cost.Value;
+        }
+
+        await _db.SaveChangesAsync();
+        return skus.Count;
+    }
+
+
 
 }

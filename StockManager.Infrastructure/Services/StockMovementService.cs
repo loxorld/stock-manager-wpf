@@ -113,6 +113,7 @@ public class StockMovementService(StockDbContext db) : IStockMovementService
             PaymentMethod = request.Type == StockMovementType.Sale
                 ? request.PaymentMethod ?? PaymentMethod.Cash
                 : null,
+            CaseStockKind = request.CaseStockKind,
             SignedQuantity = signedQty,
             UnitPrice = unitPrice,
             UnitCost = unitCost,
@@ -120,6 +121,59 @@ public class StockMovementService(StockDbContext db) : IStockMovementService
             CreatedAt = DateTime.UtcNow
         });
 
+        await _db.SaveChangesAsync();
+        await tx.CommitAsync();
+    }
+
+    public async Task DeleteSaleAsync(long movementId)
+    {
+        var movement = await _db.StockMovements
+            .Include(m => m.Sku)
+            .FirstOrDefaultAsync(m => m.Id == movementId);
+
+        if (movement == null)
+            throw new InvalidOperationException("La venta no existe.");
+
+        if (movement.Type != StockMovementType.Sale)
+            throw new InvalidOperationException("Solo se pueden eliminar ventas.");
+
+        var sku = movement.Sku ?? await _db.Skus.FirstOrDefaultAsync(x => x.Id == movement.SkuId);
+        if (sku == null)
+            throw new InvalidOperationException("SKU inexistente.");
+
+        var isTransparentCase = sku.Category == ProductCategory.Case && sku.CaseType == CaseType.Transparent;
+
+        using var tx = await _db.Database.BeginTransactionAsync();
+
+        if (sku.Category == ProductCategory.Case && !isTransparentCase)
+        {
+            if (movement.CaseStockKind is null)
+                throw new InvalidOperationException("La venta no tiene género registrado.");
+
+            var newCaseStock = movement.CaseStockKind == CaseStockKind.Women
+                ? sku.CaseStockWomen - movement.SignedQuantity
+                : sku.CaseStockMen - movement.SignedQuantity;
+
+            if (newCaseStock < 0)
+                throw new InvalidOperationException("El stock resultante no puede ser negativo.");
+
+            if (movement.CaseStockKind == CaseStockKind.Women)
+                sku.CaseStockWomen = newCaseStock;
+            else
+                sku.CaseStockMen = newCaseStock;
+
+            sku.Stock = sku.CaseStockWomen + sku.CaseStockMen;
+        }
+        else
+        {
+            var newStock = sku.Stock - movement.SignedQuantity;
+            if (newStock < 0)
+                throw new InvalidOperationException("El stock resultante no puede ser negativo.");
+
+            sku.Stock = newStock;
+        }
+
+        _db.StockMovements.Remove(movement);
         await _db.SaveChangesAsync();
         await tx.CommitAsync();
     }

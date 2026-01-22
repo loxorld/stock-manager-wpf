@@ -108,6 +108,7 @@ public class DashboardQueryService : IDashboardQueryService
         var items = await q
             .Select(m => new DashboardSaleHistoryItemDto
             {
+                Id = m.Id,
                 CreatedAt = m.CreatedAt,
                 SkuName = m.Sku != null ? m.Sku.Name : ("SKU #" + m.SkuId),
 

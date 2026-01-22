@@ -134,7 +134,16 @@ public partial class MainWindow : Window
             await _vm.LoadAsync();
     }
 
-   
+    private async void BulkPriceUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        var skuCommand = _sp.GetRequiredService<ISkuCommandService>();
+        var vm = new BulkPriceUpdateViewModel(skuCommand);
+        var win = new BulkPriceUpdateWindow(vm) { Owner = this };
+
+        var ok = win.ShowDialog();
+        if (ok == true)
+            await _vm.LoadAsync();
+    }
 
     public static readonly RoutedUICommand NewSkuCmd = new("Nuevo SKU", "NewSkuCmd", typeof(MainWindow));
     public static readonly RoutedUICommand MovementCmd = new("Registrar movimiento", "MovementCmd", typeof(MainWindow));

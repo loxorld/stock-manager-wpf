@@ -6,6 +6,9 @@ namespace StockManager.Application.Dtos;
 
 public class DashboardSaleHistoryItemDto
 {
+
+    public long Id { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public string SkuName { get; set; } = "";

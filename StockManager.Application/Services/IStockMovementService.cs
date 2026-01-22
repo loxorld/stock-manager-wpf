@@ -9,5 +9,7 @@ using StockManager.Application.Dtos;
 public interface IStockMovementService
 {
     Task RegisterAsync(RegisterMovementRequest request);
+
+    Task DeleteSaleAsync(long movementId);
 }
 
