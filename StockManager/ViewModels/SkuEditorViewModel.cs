@@ -12,13 +12,11 @@ public partial class SkuEditorViewModel : ObservableObject
 {
     private readonly ISkuQueryService _skuQuery;
     private readonly ISkuCommandService _skuCommand;
-    
 
     public int? Id { get; }
+    public int? DuplicateFromId { get; }
+    public int? SavedSkuId { get; private set; }
 
-    
-
-    // ✅ Listas para combos (enums)
     public IReadOnlyList<ProductCategory> CategoryOptions { get; } =
         Enum.GetValues(typeof(ProductCategory)).Cast<ProductCategory>().ToList();
 
@@ -39,10 +37,8 @@ public partial class SkuEditorViewModel : ObservableObject
         {
             if (SetProperty(ref category, value))
             {
-                // Cuando cambia categoría, limpiamos lo que no aplica.
                 if (category == ProductCategory.Accessory)
                 {
-                    
                     CaseType = null;
                     ProtectorType = null;
                 }
@@ -55,14 +51,12 @@ public partial class SkuEditorViewModel : ObservableObject
                     CaseType = null;
                 }
 
-                
                 OnPropertyChanged(nameof(IsCaseTypeEnabled));
                 OnPropertyChanged(nameof(IsProtectorTypeEnabled));
             }
         }
     }
 
-    
     [ObservableProperty] private CaseType? caseType;
     [ObservableProperty] private ProtectorType? protectorType;
 
@@ -71,41 +65,46 @@ public partial class SkuEditorViewModel : ObservableObject
     [ObservableProperty] private bool active = true;
     [ObservableProperty] private string? errorMessage;
 
-    //  Para habilitar/deshabilitar campos según categoría (no ocultamos, pero queda claro y consistente)
-    
     public bool IsCaseTypeEnabled => Category == ProductCategory.Case;
     public bool IsProtectorTypeEnabled => Category == ProductCategory.ScreenProtector;
 
     public SkuEditorViewModel(
         ISkuQueryService skuQuery,
         ISkuCommandService skuCommand,
-        int? id = null)
+        int? id = null,
+        int? duplicateFromId = null)
     {
         _skuQuery = skuQuery;
         _skuCommand = skuCommand;
-        
+
         Id = id;
-        Title = id is null ? "Nuevo SKU" : "Editar SKU";
+        DuplicateFromId = duplicateFromId;
+        Title = id is not null
+            ? "Editar SKU"
+            : duplicateFromId is not null
+                ? "Duplicar SKU"
+                : "Nuevo SKU";
     }
 
     public async Task InitializeAsync()
     {
         ErrorMessage = null;
 
-        
+        if (Id is null && DuplicateFromId is null)
+            return;
 
-        if (Id is null) return;
-
-        var sku = await _skuQuery.GetByIdAsync(Id.Value);
+        var skuId = Id ?? DuplicateFromId!.Value;
+        var sku = await _skuQuery.GetByIdAsync(skuId);
         if (sku == null)
         {
-            ErrorMessage = "No se encontró el SKU para editar.";
+            ErrorMessage = Id is null
+                ? "No se encontro el SKU a duplicar."
+                : "No se encontro el SKU para editar.";
             return;
         }
 
-        Name = sku.Name;
+        Name = Id is null ? $"{sku.Name} copia" : sku.Name;
         Category = sku.Category;
-        
         CaseType = sku.CaseType;
         ProtectorType = sku.ProtectorType;
         CostText = sku.Cost.ToString(CultureInfo.CurrentCulture);
@@ -117,6 +116,7 @@ public partial class SkuEditorViewModel : ObservableObject
     public async Task SaveAsync()
     {
         ErrorMessage = null;
+        SavedSkuId = null;
 
         if (string.IsNullOrWhiteSpace(Name))
         {
@@ -141,7 +141,6 @@ public partial class SkuEditorViewModel : ObservableObject
             Id = Id,
             Name = Name.Trim(),
             Category = Category,
-            
             CaseType = CaseType,
             ProtectorType = ProtectorType,
             Cost = cost,
@@ -152,9 +151,12 @@ public partial class SkuEditorViewModel : ObservableObject
         try
         {
             if (Id is null)
-                await _skuCommand.CreateAsync(req);
+                SavedSkuId = await _skuCommand.CreateAsync(req);
             else
+            {
                 await _skuCommand.UpdateAsync(req);
+                SavedSkuId = Id;
+            }
         }
         catch (Exception ex)
         {

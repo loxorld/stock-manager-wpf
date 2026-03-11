@@ -3,6 +3,7 @@ using StockManager.Application.Dtos;
 using StockManager.Application.Services;
 using StockManager.Domain.Enums;
 using StockManager.Infrastructure.Persistence;
+using StockManager.Infrastructure.Time;
 
 namespace StockManager.Infrastructure.Services;
 
@@ -41,7 +42,25 @@ public class DashboardQueryService : IDashboardQueryService
                 (decimal?)(Math.Abs(m.SignedQuantity) * (m.UnitPrice ?? (m.Sku != null ? m.Sku.Price : 0m)))
             ) ?? 0m;
 
+        var estimatedMargin = await q.SumAsync(m =>
+            (decimal?)(Math.Abs(m.SignedQuantity) *
+                ((m.UnitPrice ?? (m.Sku != null ? m.Sku.Price : 0m))
+                - (m.UnitCost ?? (m.Sku != null ? m.Sku.Cost : 0m))))
+        ) ?? 0m;
+
         var salesCount = await q.CountAsync();
+        var inventoryCost = await _db.Skus
+            .AsNoTracking()
+            .Where(s => s.Stock > 0)
+            .SumAsync(s => (decimal?)(s.Cost * s.Stock)) ?? 0m;
+
+        var productsWithoutMovement = await _db.Skus
+            .AsNoTracking()
+            .Where(s => s.Active)
+            .CountAsync(s => !_db.StockMovements.Any(m =>
+                m.SkuId == s.Id &&
+                m.CreatedAt >= fromUtc &&
+                m.CreatedAt < toUtc));
 
         return new DashboardSummaryDto
         {
@@ -49,6 +68,9 @@ public class DashboardQueryService : IDashboardQueryService
             Revenue = revenue,
             CashRevenue = cashRevenue,
             CardRevenue = cardRevenue,
+            EstimatedMargin = estimatedMargin,
+            InventoryCost = inventoryCost,
+            ProductsWithoutMovement = productsWithoutMovement,
             SalesCount = salesCount
         };
     }
@@ -64,7 +86,11 @@ public class DashboardQueryService : IDashboardQueryService
                 SkuId = g.Key.SkuId,
                 Name = g.Key.Name,
                 Units = g.Sum(x => Math.Abs(x.SignedQuantity)),
-                Revenue = g.Sum(x => (x.UnitPrice ?? (x.Sku != null ? x.Sku.Price : 0m)) * Math.Abs(x.SignedQuantity))
+                Revenue = g.Sum(x => (x.UnitPrice ?? (x.Sku != null ? x.Sku.Price : 0m)) * Math.Abs(x.SignedQuantity)),
+                Margin = g.Sum(x =>
+                    ((x.UnitPrice ?? (x.Sku != null ? x.Sku.Price : 0m))
+                    - (x.UnitCost ?? (x.Sku != null ? x.Sku.Cost : 0m)))
+                    * Math.Abs(x.SignedQuantity))
             })
             .OrderByDescending(x => x.Units)
             .ThenByDescending(x => x.Revenue)
@@ -85,10 +111,39 @@ public class DashboardQueryService : IDashboardQueryService
                 SkuId = g.Key.SkuId,
                 Name = g.Key.Name,
                 Units = g.Sum(x => Math.Abs(x.SignedQuantity)),
-                Revenue = g.Sum(x => (x.UnitPrice ?? (x.Sku != null ? x.Sku.Price : 0m)) * Math.Abs(x.SignedQuantity))
+                Revenue = g.Sum(x => (x.UnitPrice ?? (x.Sku != null ? x.Sku.Price : 0m)) * Math.Abs(x.SignedQuantity)),
+                Margin = g.Sum(x =>
+                    ((x.UnitPrice ?? (x.Sku != null ? x.Sku.Price : 0m))
+                    - (x.UnitCost ?? (x.Sku != null ? x.Sku.Cost : 0m)))
+                    * Math.Abs(x.SignedQuantity))
             })
             .OrderByDescending(x => x.Revenue)
             .ThenByDescending(x => x.Units)
+            .Take(take)
+            .ToListAsync();
+
+        return data;
+    }
+
+    public async Task<List<DashboardTopItemDto>> GetTopByMarginAsync(DateTime fromUtc, DateTime toUtc, int take = 5)
+    {
+        var data = await _db.StockMovements.AsNoTracking()
+            .Where(m => m.CreatedAt >= fromUtc && m.CreatedAt < toUtc)
+            .Where(m => m.Type == StockMovementType.Sale)
+            .GroupBy(m => new { m.SkuId, Name = m.Sku!.Name })
+            .Select(g => new DashboardTopItemDto
+            {
+                SkuId = g.Key.SkuId,
+                Name = g.Key.Name,
+                Units = g.Sum(x => Math.Abs(x.SignedQuantity)),
+                Revenue = g.Sum(x => (x.UnitPrice ?? (x.Sku != null ? x.Sku.Price : 0m)) * Math.Abs(x.SignedQuantity)),
+                Margin = g.Sum(x =>
+                    ((x.UnitPrice ?? (x.Sku != null ? x.Sku.Price : 0m))
+                    - (x.UnitCost ?? (x.Sku != null ? x.Sku.Cost : 0m)))
+                    * Math.Abs(x.SignedQuantity))
+            })
+            .OrderByDescending(x => x.Margin)
+            .ThenByDescending(x => x.Revenue)
             .Take(take)
             .ToListAsync();
 
@@ -124,7 +179,7 @@ public class DashboardQueryService : IDashboardQueryService
             .ToListAsync();
 
         foreach (var it in items)
-            it.CreatedAt = it.CreatedAt.ToLocalTime();
+            it.CreatedAt = BusinessTime.ConvertUtcToBusinessLocal(it.CreatedAt);
 
         return items;
     }
@@ -147,7 +202,7 @@ public class DashboardQueryService : IDashboardQueryService
             .ToListAsync();
 
         return items
-            .GroupBy(x => x.CreatedAt.ToLocalTime().Date)
+            .GroupBy(x => BusinessTime.ConvertUtcToBusinessLocal(x.CreatedAt).Date)
             .Select(g => new DashboardDailySalesDto
             {
                 Date = g.Key,

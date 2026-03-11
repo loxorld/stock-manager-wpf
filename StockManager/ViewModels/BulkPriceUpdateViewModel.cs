@@ -41,7 +41,10 @@ public partial class BulkPriceUpdateViewModel : ObservableObject
     [ObservableProperty] private ProtectorType? selectedProtectorType;
     [ObservableProperty] private string priceText = "";
     [ObservableProperty] private string costText = "";
+    [ObservableProperty] private string globalPercentageText = "";
+    [ObservableProperty] private bool roundGlobalPriceToHundred = true;
     [ObservableProperty] private string? errorMessage;
+    [ObservableProperty] private string? successMessage;
     [ObservableProperty] private int updatedCount;
 
     public bool IsCaseCategory => SelectedCategoryOption.Value == ProductCategory.Case;
@@ -54,9 +57,10 @@ public partial class BulkPriceUpdateViewModel : ObservableObject
         EnsureDefaultTypes();
     }
 
-    public async Task ApplyAsync()
+    public async Task ApplyByTypeAsync()
     {
         ErrorMessage = null;
+        SuccessMessage = null;
         UpdatedCount = 0;
 
         decimal? price = null;
@@ -113,6 +117,49 @@ public partial class BulkPriceUpdateViewModel : ObservableObject
             SelectedProtectorType,
             price,
             cost);
+
+        SuccessMessage = UpdatedCount switch
+        {
+            0 => "No habia items del tipo seleccionado para actualizar.",
+            1 => "Se actualizo 1 item del tipo seleccionado.",
+            _ => $"Se actualizaron {UpdatedCount} items del tipo seleccionado."
+        };
+    }
+
+    public async Task ApplyGlobalPercentageAsync()
+    {
+        ErrorMessage = null;
+        SuccessMessage = null;
+        UpdatedCount = 0;
+
+        if (!decimal.TryParse(GlobalPercentageText?.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, out var percentage))
+        {
+            ErrorMessage = "Porcentaje invalido.";
+            return;
+        }
+
+        if (percentage == 0)
+        {
+            ErrorMessage = "Indica un porcentaje distinto de 0.";
+            return;
+        }
+
+        UpdatedCount = await _skuCommand.UpdateAllPricesByPercentageAsync(
+            percentage,
+            RoundGlobalPriceToHundred);
+
+        var direction = percentage > 0 ? "aumento" : "reduccion";
+        var normalizedPercentage = Math.Abs(percentage).ToString("0.##", CultureInfo.CurrentCulture);
+        var roundingSuffix = RoundGlobalPriceToHundred
+            ? " con redondeo al 100"
+            : string.Empty;
+
+        SuccessMessage = UpdatedCount switch
+        {
+            0 => "No habia items para actualizar.",
+            1 => $"Se aplico una {direction} global del {normalizedPercentage}%{roundingSuffix} a 1 item.",
+            _ => $"Se aplico una {direction} global del {normalizedPercentage}%{roundingSuffix} a {UpdatedCount} items."
+        };
     }
 
     private void EnsureDefaultTypes()

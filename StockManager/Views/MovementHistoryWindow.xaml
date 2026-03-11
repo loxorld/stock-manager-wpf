@@ -8,6 +8,7 @@
     <Grid Margin="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -17,18 +18,58 @@
                    FontWeight="SemiBold"
                    Margin="0,0,0,12"/>
 
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Items}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  CanUserAddRows="False">
+        <Border Grid.Row="1"
+                Padding="0,0,0,12">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                    <ComboBox Width="150"
+                              Margin="0,0,10,0"
+                              ItemsSource="{Binding TypeOptions}"
+                              SelectedItem="{Binding SelectedTypeOption}"
+                              DisplayMemberPath="Display"/>
+
+                    <DatePicker Width="145"
+                                Margin="0,0,10,0"
+                                SelectedDate="{Binding FromDate}"/>
+
+                    <DatePicker Width="145"
+                                Margin="0,0,10,0"
+                                SelectedDate="{Binding ToDate}"/>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <TextBox Width="220"
+                             Margin="0,0,10,0"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Width="90"
+                            Command="{Binding ClearFiltersCommand}"
+                            Content="Limpiar"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <DataGrid ItemsSource="{Binding ItemsView}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      CanUserAddRows="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Fecha" Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="1.5*"/>
-                <DataGridTextColumn Header="Tipo" Binding="{Binding Type}" Width="1.2*"/>
+                <DataGridTextColumn Header="Tipo" Binding="{Binding TypeLabel}" Width="1.2*"/>
                 <DataGridTextColumn Header="Funda" Binding="{Binding CaseStockKindLabel}" Width="1*"/>
                 <DataGridTextColumn Header="Cantidad" Binding="{Binding SignedQuantity}" Width="0.8*"/>
                 <DataGridTextColumn Header="Nota" Binding="{Binding Note}" Width="2.5*"/>
             </DataGrid.Columns>
-        </DataGrid>
+            </DataGrid>
+
+            <Border Background="#00FFFFFF"
+                    Visibility="{Binding HasItems, Converter={StaticResource BooleanNegationConverter}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="No hay movimientos para esos filtros."
+                               FontWeight="SemiBold"
+                               Opacity="0.8"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

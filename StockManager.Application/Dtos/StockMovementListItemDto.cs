@@ -12,6 +12,7 @@ public class StockMovementListItemDto
 
     // Tipo legible (Sale, PurchaseEntry, etc.)
     public string Type { get; set; } = "";
+    public StockMovementType TypeValue { get; set; }
 
     // Cantidad con signo (+ entra, - sale)
     public int SignedQuantity { get; set; }
@@ -35,6 +36,15 @@ public class StockMovementListItemDto
         StockManager.Domain.Enums.CaseStockKind.Women => "Mujer",
         StockManager.Domain.Enums.CaseStockKind.Men => "Hombre",
         _ => null
+    };
+
+    public string TypeLabel => TypeValue switch
+    {
+        StockMovementType.PurchaseEntry => "Compra",
+        StockMovementType.Sale => "Venta",
+        StockMovementType.Adjustment => "Ajuste",
+        StockMovementType.Shrinkage => "Merma",
+        _ => Type
     };
 }
 

@@ -6,7 +6,6 @@ namespace StockManager.Infrastructure.Persistence;
 
 public class StockDbContext : DbContext
 {
-    
     public DbSet<Sku> Skus => Set<Sku>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
 
@@ -16,9 +15,6 @@ public class StockDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        
-
-        // Sku
         modelBuilder.Entity<Sku>(e =>
         {
             e.ToTable("skus");
@@ -28,11 +24,7 @@ public class StockDbContext : DbContext
 
             e.Property(x => x.Cost).HasColumnType("decimal(12,2)");
             e.Property(x => x.Price).HasColumnType("decimal(12,2)");
-
-            
         });
-
-        
 
         modelBuilder.Entity<StockMovement>(e =>
         {
@@ -44,7 +36,7 @@ public class StockDbContext : DbContext
             e.HasOne(x => x.Sku)
              .WithMany()
              .HasForeignKey(x => x.SkuId)
-             .OnDelete(DeleteBehavior.Cascade); //  antes estaba Restrict
+             .OnDelete(DeleteBehavior.Cascade);
 
             e.HasIndex(x => x.SkuId);
             e.HasIndex(x => x.CreatedAt);

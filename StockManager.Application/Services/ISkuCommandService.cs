@@ -18,5 +18,6 @@ public interface ISkuCommandService
          ProtectorType? protectorType,
          decimal? price,
          decimal? cost);
+    Task<int> UpdateAllPricesByPercentageAsync(decimal percentage, bool roundToNearestHundred);
 }
 

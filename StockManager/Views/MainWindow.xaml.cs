@@ -1,18 +1,10 @@
-﻿using System.Text;
+using Microsoft.Extensions.DependencyInjection;
+using MaterialDesignThemes.Wpf;
+using StockManager.Application.Services;
+using StockManager.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using StockManager.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
-using StockManager.Views;
-using StockManager.Application.Services;
-
 
 namespace StockManager.Views;
 
@@ -20,6 +12,16 @@ public partial class MainWindow : Window
 {
     private readonly IServiceProvider _sp;
     private readonly StockViewModel _vm;
+    private bool _hasAnimated;
+    public SnackbarMessageQueue SnackbarMessageQueue { get; } = new(TimeSpan.FromSeconds(4));
+
+    public static readonly RoutedUICommand NewSkuCmd = new("Nuevo SKU", "NewSkuCmd", typeof(MainWindow));
+    public static readonly RoutedUICommand MovementCmd = new("Registrar movimiento", "MovementCmd", typeof(MainWindow));
+    public static readonly RoutedUICommand RefreshCmd = new("Refrescar", "RefreshCmd", typeof(MainWindow));
+    public static readonly RoutedUICommand DeleteSkuCmd = new("Eliminar SKU", "DeleteSkuCmd", typeof(MainWindow));
+    public static readonly RoutedUICommand EditSkuCmd = new("Editar SKU", "EditSkuCmd", typeof(MainWindow));
+    public static readonly RoutedUICommand FocusSearchCmd = new("Buscar", "FocusSearchCmd", typeof(MainWindow));
+    public static readonly RoutedUICommand DuplicateSkuCmd = new("Duplicar SKU", "DuplicateSkuCmd", typeof(MainWindow));
 
     public MainWindow(IServiceProvider sp, StockViewModel vm)
     {
@@ -28,28 +30,35 @@ public partial class MainWindow : Window
         _vm = vm;
 
         DataContext = vm;
-        Loaded += async (_, __) => await vm.LoadAsync();
+        UiToast.ToastRaised += OnToastRaised;
+        Closed += (_, __) => UiToast.ToastRaised -= OnToastRaised;
+        Loaded += async (_, __) =>
+        {
+            await vm.LoadAsync();
+            ApplySortIndicators();
+            RunEntranceAnimations();
+        };
     }
 
     private async void RegisterMovement_Click(object sender, RoutedEventArgs e)
     {
         if (_vm.SelectedItem == null)
         {
-            MessageBox.Show("Seleccioná un ítem primero.", "Atención", MessageBoxButton.OK, MessageBoxImage.Information);
+            UiToast.ShowInfo("Selecciona un item primero.");
             return;
         }
 
-        RegisterMovementViewModel mvm;
+        RegisterMovementViewModel movementVm;
         if (_vm.SelectedItem.CategoryValue == StockManager.Domain.Enums.ProductCategory.Case)
         {
             var caseType = _vm.SelectedItem.CaseType;
             if (caseType == null)
             {
-                MessageBox.Show("El SKU de funda no tiene tipo asignado.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
+                UiToast.ShowWarning("El SKU de funda no tiene tipo asignado.");
                 return;
             }
 
-            mvm = ActivatorUtilities.CreateInstance<RegisterMovementViewModel>(
+            movementVm = ActivatorUtilities.CreateInstance<RegisterMovementViewModel>(
                 _sp,
                 _vm.SelectedItem.Id,
                 _vm.SelectedItem.Name,
@@ -59,7 +68,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            mvm = ActivatorUtilities.CreateInstance<RegisterMovementViewModel>(
+            movementVm = ActivatorUtilities.CreateInstance<RegisterMovementViewModel>(
                 _sp,
                 _vm.SelectedItem.Id,
                 _vm.SelectedItem.Name,
@@ -67,21 +76,24 @@ public partial class MainWindow : Window
             );
         }
 
-        var win = new RegisterMovementWindow(mvm)
+        var win = new RegisterMovementWindow(movementVm)
         {
             Owner = this
         };
 
         var ok = win.ShowDialog();
         if (ok == true)
-            await _vm.LoadAsync();
+        {
+            await ReloadStockAsync(_vm.SelectedItem.Id);
+            UiToast.ShowSuccess("Movimiento registrado.");
+        }
     }
 
     private void ViewHistory_Click(object sender, RoutedEventArgs e)
     {
         if (_vm.SelectedItem == null)
         {
-            MessageBox.Show("Seleccioná un ítem primero.", "Atención", MessageBoxButton.OK, MessageBoxImage.Information);
+            UiToast.ShowInfo("Selecciona un item primero.");
             return;
         }
 
@@ -101,37 +113,29 @@ public partial class MainWindow : Window
 
     private async void NewSku_Click(object sender, RoutedEventArgs e)
     {
-        var skuQuery = _sp.GetRequiredService<ISkuQueryService>();
-        var skuCommand = _sp.GetRequiredService<ISkuCommandService>();
-        
-
-        var vm = new SkuEditorViewModel(skuQuery, skuCommand, id: null);
-        var win = new SkuEditorWindow(vm) { Owner = this };
-
-        var ok = win.ShowDialog();
-        if (ok == true)
-            await _vm.LoadAsync();
+        await OpenSkuEditorAsync(id: null, duplicateFromId: null);
     }
 
     private async void EditSku_Click(object sender, RoutedEventArgs e)
     {
         if (_vm.SelectedItem == null)
         {
-            MessageBox.Show("Seleccioná un ítem primero.", "Atención",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            UiToast.ShowInfo("Selecciona un item primero.");
             return;
         }
 
-        var skuQuery = _sp.GetRequiredService<ISkuQueryService>();
-        var skuCommand = _sp.GetRequiredService<ISkuCommandService>();
-        
+        await OpenSkuEditorAsync(id: _vm.SelectedItem.Id, duplicateFromId: null);
+    }
 
-        var vm = new SkuEditorViewModel(skuQuery, skuCommand, id: _vm.SelectedItem.Id);
-        var win = new SkuEditorWindow(vm) { Owner = this };
+    private async void DuplicateSku_Click(object sender, RoutedEventArgs e)
+    {
+        if (_vm.SelectedItem == null)
+        {
+            UiToast.ShowInfo("Selecciona un item para duplicar.");
+            return;
+        }
 
-        var ok = win.ShowDialog();
-        if (ok == true)
-            await _vm.LoadAsync();
+        await OpenSkuEditorAsync(id: null, duplicateFromId: _vm.SelectedItem.Id);
     }
 
     private async void BulkPriceUpdate_Click(object sender, RoutedEventArgs e)
@@ -142,20 +146,26 @@ public partial class MainWindow : Window
 
         var ok = win.ShowDialog();
         if (ok == true)
-            await _vm.LoadAsync();
+        {
+            await ReloadStockAsync(_vm.SelectedItem?.Id);
+            UiToast.ShowSuccess(
+                string.IsNullOrWhiteSpace(vm.SuccessMessage)
+                    ? "Precios actualizados."
+                    : vm.SuccessMessage);
+        }
     }
 
-    public static readonly RoutedUICommand NewSkuCmd = new("Nuevo SKU", "NewSkuCmd", typeof(MainWindow));
-    public static readonly RoutedUICommand MovementCmd = new("Registrar movimiento", "MovementCmd", typeof(MainWindow));
+    private void NewSku_Executed(object sender, ExecutedRoutedEventArgs e) => NewSku_Click(sender, e);
+    private void Movement_Executed(object sender, ExecutedRoutedEventArgs e) => RegisterMovement_Click(sender, e);
+    private async void Refresh_Executed(object sender, ExecutedRoutedEventArgs e) => await ReloadStockAsync(_vm.SelectedItem?.Id);
+    private void DeleteSku_Executed(object sender, ExecutedRoutedEventArgs e) => DeleteSku_Click(sender, e);
+    private void EditSku_Executed(object sender, ExecutedRoutedEventArgs e) => EditSku_Click(sender, e);
+    private void DuplicateSku_Executed(object sender, ExecutedRoutedEventArgs e) => DuplicateSku_Click(sender, e);
 
-    private void NewSku_Executed(object sender, ExecutedRoutedEventArgs e)
+    private void FocusSearch_Executed(object sender, ExecutedRoutedEventArgs e)
     {
-        NewSku_Click(sender, e);
-    }
-
-    private void Movement_Executed(object sender, ExecutedRoutedEventArgs e)
-    {
-        RegisterMovement_Click(sender, e);
+        SearchTextBox.Focus();
+        SearchTextBox.SelectAll();
     }
 
     private void Dashboard_Click(object sender, RoutedEventArgs e)
@@ -169,17 +179,16 @@ public partial class MainWindow : Window
     {
         if (_vm.SelectedItem == null)
         {
-            MessageBox.Show("Seleccioná un SKU primero.", "Atención",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            UiToast.ShowInfo("Selecciona un SKU primero.");
             return;
         }
 
-        var it = _vm.SelectedItem;
+        var item = _vm.SelectedItem;
 
         var confirm = MessageBox.Show(
-            $"¿Eliminar el SKU?\n\n{it.Name}\n\n" +
-            "Solo se puede eliminar si el stock es 0.",
-            "Confirmar eliminación",
+            $"Eliminar el SKU?\n\n{item.Name}\n\n" +
+            "Solo se puede eliminar si el stock es 0 y no tiene historial.",
+            "Confirmar eliminacion",
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning
         );
@@ -190,8 +199,9 @@ public partial class MainWindow : Window
         try
         {
             var cmd = _sp.GetRequiredService<ISkuCommandService>();
-            await cmd.DeleteAsync(it.Id);
-            await _vm.LoadAsync();
+            await cmd.DeleteAsync(item.Id);
+            await ReloadStockAsync(null);
+            UiToast.ShowSuccess("SKU eliminado.");
         }
         catch (Exception ex)
         {
@@ -199,6 +209,87 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ItemsGrid_Sorting(object sender, DataGridSortingEventArgs e)
+    {
+        e.Handled = true;
 
+        var sortMemberPath = e.Column.SortMemberPath;
+        if (string.IsNullOrWhiteSpace(sortMemberPath))
+            return;
 
+        _vm.ToggleSort(sortMemberPath);
+        ApplySortIndicators();
+    }
+
+    private void ApplySortIndicators()
+    {
+        foreach (var column in ItemsGrid.Columns)
+        {
+            if (string.IsNullOrWhiteSpace(column.SortMemberPath))
+            {
+                column.SortDirection = null;
+                continue;
+            }
+
+            column.SortDirection = _vm.GetSortDirection(column.SortMemberPath);
+        }
+    }
+
+    private async Task OpenSkuEditorAsync(int? id, int? duplicateFromId)
+    {
+        var skuQuery = _sp.GetRequiredService<ISkuQueryService>();
+        var skuCommand = _sp.GetRequiredService<ISkuCommandService>();
+
+        var vm = new SkuEditorViewModel(skuQuery, skuCommand, id, duplicateFromId);
+        var win = new SkuEditorWindow(vm) { Owner = this };
+
+        var ok = win.ShowDialog();
+        if (ok != true)
+            return;
+
+        await ReloadStockAsync(vm.SavedSkuId ?? _vm.SelectedItem?.Id);
+        UiToast.ShowSuccess(
+            id is not null
+                ? "SKU actualizado."
+                : duplicateFromId is not null
+                    ? "SKU duplicado."
+                    : "SKU creado.");
+    }
+
+    private async Task ReloadStockAsync(int? selectId)
+    {
+        if (selectId.HasValue)
+            _vm.SelectItemOnNextLoad(selectId.Value);
+
+        await _vm.LoadAsync();
+        ApplySortIndicators();
+    }
+
+    private void OnToastRaised(UiToastMessage toast)
+    {
+        var prefix = toast.Level switch
+        {
+            UiToastLevel.Success => "Listo",
+            UiToastLevel.Warning => "Aviso",
+            UiToastLevel.Error => "Error",
+            _ => "Info"
+        };
+
+        SnackbarMessageQueue.Enqueue($"{prefix}: {toast.Message}");
+    }
+
+    private void RunEntranceAnimations()
+    {
+        if (_hasAnimated)
+            return;
+
+        _hasAnimated = true;
+        EntranceAnimator.AnimateSequence(
+            TopBarPanel,
+            FiltersCard,
+            CriticalCard,
+            TotalsCard,
+            StockGridCard,
+            DetailPanelCard);
+    }
 }

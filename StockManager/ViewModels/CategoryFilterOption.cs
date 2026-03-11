@@ -16,6 +16,6 @@ public sealed class CategoryFilterOption
         Display = display;
     }
 
-    public override string ToString() => Display; // por si las moscas
+    public override string ToString() => Display;
 }
 

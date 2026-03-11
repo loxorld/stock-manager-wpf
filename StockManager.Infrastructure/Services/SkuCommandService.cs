@@ -19,15 +19,11 @@ public class SkuCommandService(StockDbContext db) : ISkuCommandService
         {
             Name = r.Name.Trim(),
             Category = r.Category,
-            
             CaseType = r.CaseType,
             ProtectorType = r.ProtectorType,
-
-            Stock = 0, //  stock inicial siempre 0, luego solo movimientos
+            Stock = 0,
             CaseStockWomen = 0,
             CaseStockMen = 0,
-
-
             Cost = r.Cost,
             Price = r.Price,
             Active = r.Active
@@ -49,7 +45,6 @@ public class SkuCommandService(StockDbContext db) : ISkuCommandService
 
         sku.Name = r.Name.Trim();
         sku.Category = r.Category;
-        
         sku.CaseType = r.CaseType;
         sku.ProtectorType = r.ProtectorType;
 
@@ -76,13 +71,10 @@ public class SkuCommandService(StockDbContext db) : ISkuCommandService
 
         if (r.Category == ProductCategory.Accessory)
         {
-            
             r.CaseType = null;
             r.ProtectorType = null;
             return;
         }
-
-        
 
         if (r.Category == ProductCategory.Case && r.CaseType is null)
             throw new ArgumentException("El tipo de funda es obligatorio.");
@@ -95,6 +87,12 @@ public class SkuCommandService(StockDbContext db) : ISkuCommandService
     {
         var sku = await _db.Skus.FirstOrDefaultAsync(x => x.Id == id)
             ?? throw new InvalidOperationException("SKU inexistente.");
+
+        var hasMovementHistory = await _db.StockMovements.AnyAsync(x => x.SkuId == id);
+        if (hasMovementHistory)
+            throw new InvalidOperationException(
+                "No se puede eliminar un SKU con historial de movimientos."
+            );
 
         if (sku.Stock != 0)
             throw new InvalidOperationException(
@@ -151,6 +149,32 @@ public class SkuCommandService(StockDbContext db) : ISkuCommandService
         return skus.Count;
     }
 
+    public async Task<int> UpdateAllPricesByPercentageAsync(decimal percentage, bool roundToNearestHundred)
+    {
+        if (percentage == 0)
+            throw new ArgumentException("El porcentaje debe ser distinto de 0.");
 
+        if (percentage <= -100)
+            throw new ArgumentException("El porcentaje no puede dejar precios en 0 o negativos.");
 
+        var factor = 1m + (percentage / 100m);
+        var skus = await _db.Skus.ToListAsync();
+
+        foreach (var sku in skus)
+        {
+            var updatedPrice = decimal.Round(sku.Price * factor, 2, MidpointRounding.AwayFromZero);
+            sku.Price = roundToNearestHundred
+                ? RoundToNearestHundred(updatedPrice)
+                : updatedPrice;
+        }
+
+        await _db.SaveChangesAsync();
+        return skus.Count;
+    }
+
+    private static decimal RoundToNearestHundred(decimal amount)
+    {
+        var rounded = decimal.Round(amount / 100m, 0, MidpointRounding.AwayFromZero) * 100m;
+        return rounded <= 0 && amount > 0 ? 100m : rounded;
+    }
 }

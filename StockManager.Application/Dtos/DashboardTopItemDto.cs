@@ -10,5 +10,6 @@ public class DashboardTopItemDto
     public string Name { get; set; } = "";
     public int Units { get; set; }
     public decimal Revenue { get; set; }
+    public decimal Margin { get; set; }
 }
 

@@ -7,6 +7,7 @@ namespace StockManager.Views;
 public partial class DashboardWindow : Window
 {
     private readonly DashboardViewModel _vm;
+    private bool _hasAnimated;
 
     public DashboardWindow(DashboardViewModel vm)
     {
@@ -19,6 +20,7 @@ public partial class DashboardWindow : Window
             try
             {
                 await _vm.LoadAsync();
+                RunEntranceAnimations();
             }
             catch (Exception ex)
             {
@@ -31,4 +33,17 @@ public partial class DashboardWindow : Window
     private void Week_Click(object sender, RoutedEventArgs e) => _vm.SelectedPeriod = DashboardPeriod.Week;
     private void Month_Click(object sender, RoutedEventArgs e) => _vm.SelectedPeriod = DashboardPeriod.Month;
 
+    private void RunEntranceAnimations()
+    {
+        if (_hasAnimated)
+            return;
+
+        _hasAnimated = true;
+        EntranceAnimator.AnimateSequence(
+            DashboardTopBar,
+            DashboardFiltersCard,
+            DashboardKpisPanel,
+            DashboardHighlightsGrid,
+            DashboardHistoryCard);
+    }
 }

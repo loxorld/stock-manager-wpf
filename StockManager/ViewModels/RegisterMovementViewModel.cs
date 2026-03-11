@@ -23,14 +23,12 @@ public partial class RegisterMovementViewModel : ObservableObject
     [ObservableProperty]
     private string skuName;
 
-    // Enum “real”
     [ObservableProperty]
     private StockMovementType type = StockMovementType.Sale;
 
     [ObservableProperty]
     private bool isSale = true;
 
-    // Opciones para el ComboBox (texto lindo + valor real)
     public IReadOnlyList<MovementTypeOption> MovementTypeOptions { get; } = new List<MovementTypeOption>
     {
         new(StockMovementType.Sale, "Venta"),
@@ -44,7 +42,7 @@ public partial class RegisterMovementViewModel : ObservableObject
         new(PaymentMethod.Cash, "Efectivo"),
         new(PaymentMethod.MercadoPago, "MercadoPago / Tarjeta")
     };
-    // Lo que selecciona el ComboBox
+
     private MovementTypeOption selectedTypeOption = null!;
     public MovementTypeOption SelectedTypeOption
     {
@@ -53,7 +51,6 @@ public partial class RegisterMovementViewModel : ObservableObject
         {
             if (SetProperty(ref selectedTypeOption, value))
             {
-                // Sincroniza el enum real
                 Type = value.Value;
             }
         }
@@ -101,7 +98,6 @@ public partial class RegisterMovementViewModel : ObservableObject
         }
     }
 
-    // string para permitir "-" en ajuste
     [ObservableProperty]
     private string quantityText = "1";
 
@@ -132,17 +128,15 @@ public partial class RegisterMovementViewModel : ObservableObject
         IsCaseSku = category == ProductCategory.Case;
         CaseType = caseType;
 
-        // Default: Venta
         SelectedTypeOption = MovementTypeOptions.First(x => x.Value == Type);
         SelectedPaymentMethodOption = PaymentMethodOptions.First(x => x.Value == PaymentMethod.Cash);
     }
 
-    // Si Type cambia por algún motivo, mantenemos sincronizado el combo.
     partial void OnTypeChanged(StockMovementType value)
     {
         var opt = MovementTypeOptions.FirstOrDefault(x => x.Value == value);
         if (opt != null && !ReferenceEquals(opt, SelectedTypeOption))
-            selectedTypeOption = opt; // set directo para evitar loop
+            selectedTypeOption = opt;
         OnPropertyChanged(nameof(SelectedTypeOption));
         IsSale = value == StockMovementType.Sale;
     }
@@ -164,7 +158,6 @@ public partial class RegisterMovementViewModel : ObservableObject
             return;
         }
 
-        // Reglas de validación según tipo
         if (Type == StockMovementType.Adjustment)
         {
             if (qty == 0)
@@ -181,7 +174,6 @@ public partial class RegisterMovementViewModel : ObservableObject
         }
         else
         {
-            // Para Entry/Sale/Shrinkage, la cantidad debe ser positiva
             if (qty <= 0)
             {
                 ErrorMessage = "La cantidad debe ser mayor a 0.";
@@ -220,15 +212,11 @@ public partial class RegisterMovementViewModel : ObservableObject
 
             if (Type == StockMovementType.Adjustment)
             {
-                // Adjustment acepta signo
                 req.SignedQuantity = qty;
-
-                // no se usa en Adjustment, pero lo dejamos válido
                 req.Quantity = 1;
             }
             else
             {
-                // Los demás tipos usan Quantity positiva
                 req.Quantity = qty;
                 req.SignedQuantity = null;
             }
@@ -240,7 +228,4 @@ public partial class RegisterMovementViewModel : ObservableObject
             ErrorMessage = ex.Message;
         }
     }
-
-
-
 }

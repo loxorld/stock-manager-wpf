@@ -21,7 +21,17 @@ public partial class MovementHistoryWindow : Window
     {
         InitializeComponent();
         DataContext = vm;
-        Loaded += async (_, __) => await Vm.LoadAsync();
+        Loaded += async (_, __) =>
+        {
+            try
+            {
+                await Vm.LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                UiError.Show(ex, "No se pudo cargar el historial");
+            }
+        };
     }
 }
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using StockManager.Application.Dtos;
 using StockManager.Application.Services;
 using StockManager.Domain.Entities;
@@ -15,18 +15,18 @@ public class StockMovementService(StockDbContext db) : IStockMovementService
     {
         if (request.Type != StockMovementType.Adjustment)
         {
-            // Para Sale / PurchaseEntry / Shrinkage: Quantity debe ser > 0
             if (request.Quantity <= 0)
                 throw new ArgumentException("La cantidad debe ser mayor a 0.");
         }
-        else
+        else if (!request.SignedQuantity.HasValue || request.SignedQuantity.Value == 0)
         {
-            // Para Adjustment: se usa SignedQuantity
-            if (!request.SignedQuantity.HasValue || request.SignedQuantity.Value == 0)
-                throw new ArgumentException("En un ajuste, la cantidad firmada no puede ser 0.");
+            throw new ArgumentException("En un ajuste, la cantidad firmada no puede ser 0.");
         }
 
-        var sku = await _db.Skus.FirstOrDefaultAsync(x => x.Id == request.SkuId);
+        var sku = await _db.Skus
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == request.SkuId);
+
         if (sku == null)
             throw new InvalidOperationException("SKU inexistente.");
 
@@ -41,8 +41,7 @@ public class StockMovementService(StockDbContext db) : IStockMovementService
         if (isTransparentCase && request.CaseStockKind is not null)
             throw new InvalidOperationException("Las fundas transparentes no llevan género.");
 
-        // Calcular signedQty real a aplicar al stock
-        int signedQty = request.Type switch
+        var signedQty = request.Type switch
         {
             StockMovementType.PurchaseEntry => +request.Quantity,
             StockMovementType.Sale => -request.Quantity,
@@ -51,60 +50,34 @@ public class StockMovementService(StockDbContext db) : IStockMovementService
             _ => throw new InvalidOperationException("Tipo de movimiento inválido.")
         };
 
-        if (sku.Category == ProductCategory.Case && !isTransparentCase)
-        {
-            var newCaseStock = request.CaseStockKind == CaseStockKind.Women
-                ? sku.CaseStockWomen + signedQty
-                : sku.CaseStockMen + signedQty;
-
-            if (newCaseStock < 0)
-                throw new InvalidOperationException("Stock insuficiente para realizar el movimiento.");
-
-            if (request.CaseStockKind == CaseStockKind.Women)
-                sku.CaseStockWomen = newCaseStock;
-            else
-                sku.CaseStockMen = newCaseStock;
-
-            sku.Stock = sku.CaseStockWomen + sku.CaseStockMen;
-        }
-        else
-        {
-            
-
-            var newStock = sku.Stock + signedQty;
-            if (newStock < 0)
-                throw new InvalidOperationException("Stock insuficiente para realizar el movimiento.");
-
-            sku.Stock = newStock;
-        }
-
-        // Captura de valores “históricos” 
         decimal? unitPrice = null;
         decimal? unitCost = null;
 
         switch (request.Type)
         {
             case StockMovementType.Sale:
-                unitPrice = sku.Price; // precio vigente en el momento de vender
-                unitCost = sku.Cost;   // costo vigente (sirve para margen)
+                unitPrice = sku.Price;
+                unitCost = sku.Cost;
                 break;
 
             case StockMovementType.PurchaseEntry:
-                // Compra: el costo tiene sentido; precio es opcional
                 unitCost = sku.Cost;
-                unitPrice = sku.Price; // opcional, puede servir para análisis
+                unitPrice = sku.Price;
                 break;
 
             case StockMovementType.Shrinkage:
             case StockMovementType.Adjustment:
-                // No “genera ingresos”, pero el costo sirve si después quiero valuación
                 unitCost = sku.Cost;
                 break;
         }
 
         using var tx = await _db.Database.BeginTransactionAsync();
 
-        
+        await ApplyStockChangeOrThrowAsync(
+            sku,
+            signedQty,
+            request.CaseStockKind,
+            "Stock insuficiente para realizar el movimiento.");
 
         _db.StockMovements.Add(new StockMovement
         {
@@ -128,6 +101,7 @@ public class StockMovementService(StockDbContext db) : IStockMovementService
     public async Task DeleteSaleAsync(long movementId)
     {
         var movement = await _db.StockMovements
+            .AsNoTracking()
             .Include(m => m.Sku)
             .FirstOrDefaultAsync(m => m.Id == movementId);
 
@@ -137,44 +111,77 @@ public class StockMovementService(StockDbContext db) : IStockMovementService
         if (movement.Type != StockMovementType.Sale)
             throw new InvalidOperationException("Solo se pueden eliminar ventas.");
 
-        var sku = movement.Sku ?? await _db.Skus.FirstOrDefaultAsync(x => x.Id == movement.SkuId);
+        var sku = movement.Sku
+            ?? await _db.Skus.AsNoTracking().FirstOrDefaultAsync(x => x.Id == movement.SkuId);
+
         if (sku == null)
             throw new InvalidOperationException("SKU inexistente.");
 
         var isTransparentCase = sku.Category == ProductCategory.Case && sku.CaseType == CaseType.Transparent;
+        if (sku.Category == ProductCategory.Case && !isTransparentCase && movement.CaseStockKind is null)
+            throw new InvalidOperationException("La venta no tiene género registrado.");
 
         using var tx = await _db.Database.BeginTransactionAsync();
 
+        await ApplyStockChangeOrThrowAsync(
+            sku,
+            -movement.SignedQuantity,
+            movement.CaseStockKind,
+            "El stock resultante no puede ser negativo.");
+
+        var deletedRows = await _db.StockMovements
+            .Where(m => m.Id == movementId && m.Type == StockMovementType.Sale)
+            .ExecuteDeleteAsync();
+
+        if (deletedRows == 0)
+            throw new InvalidOperationException("La venta ya no existe.");
+
+        await tx.CommitAsync();
+    }
+
+    private async Task ApplyStockChangeOrThrowAsync(
+        Sku sku,
+        int signedQty,
+        CaseStockKind? caseStockKind,
+        string insufficientStockMessage)
+    {
+        var affectedRows = await ApplyStockChangeAsync(sku, signedQty, caseStockKind);
+        if (affectedRows > 0)
+            return;
+
+        var skuExists = await _db.Skus.AnyAsync(x => x.Id == sku.Id);
+        if (!skuExists)
+            throw new InvalidOperationException("SKU inexistente.");
+
+        throw new InvalidOperationException(insufficientStockMessage);
+    }
+
+    private Task<int> ApplyStockChangeAsync(Sku sku, int signedQty, CaseStockKind? caseStockKind)
+    {
+        var query = _db.Skus.Where(x => x.Id == sku.Id);
+        var isTransparentCase = sku.Category == ProductCategory.Case && sku.CaseType == CaseType.Transparent;
+
         if (sku.Category == ProductCategory.Case && !isTransparentCase)
         {
-            if (movement.CaseStockKind is null)
-                throw new InvalidOperationException("La venta no tiene género registrado.");
+            if (caseStockKind == CaseStockKind.Women)
+            {
+                return query
+                    .Where(x => x.CaseStockWomen + signedQty >= 0)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(x => x.CaseStockWomen, x => x.CaseStockWomen + signedQty)
+                        .SetProperty(x => x.Stock, x => x.Stock + signedQty));
+            }
 
-            var newCaseStock = movement.CaseStockKind == CaseStockKind.Women
-                ? sku.CaseStockWomen - movement.SignedQuantity
-                : sku.CaseStockMen - movement.SignedQuantity;
-
-            if (newCaseStock < 0)
-                throw new InvalidOperationException("El stock resultante no puede ser negativo.");
-
-            if (movement.CaseStockKind == CaseStockKind.Women)
-                sku.CaseStockWomen = newCaseStock;
-            else
-                sku.CaseStockMen = newCaseStock;
-
-            sku.Stock = sku.CaseStockWomen + sku.CaseStockMen;
-        }
-        else
-        {
-            var newStock = sku.Stock - movement.SignedQuantity;
-            if (newStock < 0)
-                throw new InvalidOperationException("El stock resultante no puede ser negativo.");
-
-            sku.Stock = newStock;
+            return query
+                .Where(x => x.CaseStockMen + signedQty >= 0)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.CaseStockMen, x => x.CaseStockMen + signedQty)
+                    .SetProperty(x => x.Stock, x => x.Stock + signedQty));
         }
 
-        _db.StockMovements.Remove(movement);
-        await _db.SaveChangesAsync();
-        await tx.CommitAsync();
+        return query
+            .Where(x => x.Stock + signedQty >= 0)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.Stock, x => x.Stock + signedQty));
     }
 }

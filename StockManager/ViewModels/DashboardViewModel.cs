@@ -1,14 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StockManager.Application.Dtos;
 using StockManager.Application.Services;
+using StockManager.Infrastructure.Time;
 using StockManager.Views;
-using System;
-using System.Linq;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
-
 
 namespace StockManager.ViewModels;
 
@@ -26,45 +25,54 @@ public partial class DashboardViewModel : ObservableObject
     private readonly IStockMovementService _stockMovementService;
 
     [ObservableProperty] private bool isLoading;
-
     [ObservableProperty] private DashboardPeriod selectedPeriod = DashboardPeriod.Today;
-
     [ObservableProperty] private decimal revenue;
     [ObservableProperty] private decimal cashRevenue;
     [ObservableProperty] private decimal cardRevenue;
+    [ObservableProperty] private decimal estimatedMargin;
+    [ObservableProperty] private decimal inventoryCost;
     [ObservableProperty] private int unitsSold;
     [ObservableProperty] private int salesCount;
+    [ObservableProperty] private int productsWithoutMovement;
     [ObservableProperty] private DateTime? fromDate;
     [ObservableProperty] private DateTime? toDate;
     [ObservableProperty] private decimal maxDailyRevenue = 1;
+    [ObservableProperty] private decimal maxTopRevenue = 1;
+    [ObservableProperty] private decimal maxTopMargin = 1;
+    [ObservableProperty] private int maxTopUnits = 1;
     [ObservableProperty] private bool hasDailySales;
     [ObservableProperty] private bool hasTopByUnits;
     [ObservableProperty] private bool hasTopByRevenue;
-
+    [ObservableProperty] private bool hasTopByMargin;
     [ObservableProperty] private string revenueDeltaText = "Sin cambios";
     [ObservableProperty] private string cashRevenueDeltaText = "Sin cambios";
     [ObservableProperty] private string cardRevenueDeltaText = "Sin cambios";
+    [ObservableProperty] private string estimatedMarginDeltaText = "Sin cambios";
     [ObservableProperty] private string unitsSoldDeltaText = "Sin cambios";
     [ObservableProperty] private string salesCountDeltaText = "Sin cambios";
-
+    [ObservableProperty] private string currentRangeLabel = "Hoy";
+    [ObservableProperty] private string averageDailyRevenueText = "Promedio diario: $0";
+    [ObservableProperty] private string bestDayText = "Sin mejor dia todavia";
+    [ObservableProperty] private bool isFiltersExpanded;
 
     public ObservableCollection<DashboardTopItemDto> TopByUnits { get; } = new();
     public ObservableCollection<DashboardTopItemDto> TopByRevenue { get; } = new();
+    public ObservableCollection<DashboardTopItemDto> TopByMargin { get; } = new();
     public ObservableCollection<DashboardDailySalesDto> DailySales { get; } = new();
-
     public ObservableCollection<DashboardSaleHistoryItemDto> SalesHistory { get; } = new();
-
 
     public DashboardViewModel(IDashboardQueryService dashboard, IStockMovementService stockMovementService)
     {
         _dashboard = dashboard;
         _stockMovementService = stockMovementService;
 
-        var today = DateTime.Today;
+        var today = BusinessTime.GetBusinessToday();
         FromDate = today;
         ToDate = today;
         HasDailySales = true;
     }
+
+    public string FiltersToggleLabel => IsFiltersExpanded ? "Ocultar filtros" : "Mostrar filtros";
 
     [RelayCommand]
     public async Task DeleteSaleAsync(DashboardSaleHistoryItemDto? sale)
@@ -73,9 +81,9 @@ public partial class DashboardViewModel : ObservableObject
             return;
 
         var confirm = MessageBox.Show(
-            $"¿Querés eliminar la venta de \"{sale.SkuName}\" por {sale.Quantity} unidad(es)?\n" +
-            "Esto devolverá el stock y eliminará el movimiento.",
-            "Confirmar eliminación de venta",
+            $"Queres eliminar la venta de \"{sale.SkuName}\" por {sale.Quantity} unidad(es)?\n" +
+            "Esto devolvera el stock y eliminara el movimiento.",
+            "Confirmar eliminacion de venta",
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning);
 
@@ -93,7 +101,6 @@ public partial class DashboardViewModel : ObservableObject
         }
     }
 
-
     [RelayCommand]
     public async Task ApplyRangeAsync()
     {
@@ -102,41 +109,64 @@ public partial class DashboardViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void ToggleFiltersExpanded()
+        => IsFiltersExpanded = !IsFiltersExpanded;
+
+    [RelayCommand]
     public async Task LoadAsync()
     {
         IsLoading = true;
         HasDailySales = true;
+
         try
         {
             var (fromUtc, toUtc) = SelectedPeriod == DashboardPeriod.Range
                 ? GetCustomRangeUtc()
                 : GetRangeUtc(SelectedPeriod);
 
+            CurrentRangeLabel = BuildRangeLabel(fromUtc, toUtc);
             var (prevFromUtc, prevToUtc) = GetPreviousRangeUtc(fromUtc, toUtc);
 
             var summary = await _dashboard.GetSummaryAsync(fromUtc, toUtc);
             Revenue = summary.Revenue;
             CashRevenue = summary.CashRevenue;
             CardRevenue = summary.CardRevenue;
+            EstimatedMargin = summary.EstimatedMargin;
+            InventoryCost = summary.InventoryCost;
             UnitsSold = summary.UnitsSold;
             SalesCount = summary.SalesCount;
+            ProductsWithoutMovement = summary.ProductsWithoutMovement;
 
             var previousSummary = await _dashboard.GetSummaryAsync(prevFromUtc, prevToUtc);
             RevenueDeltaText = BuildDeltaText(Revenue, previousSummary.Revenue);
             CashRevenueDeltaText = BuildDeltaText(CashRevenue, previousSummary.CashRevenue);
             CardRevenueDeltaText = BuildDeltaText(CardRevenue, previousSummary.CardRevenue);
+            EstimatedMarginDeltaText = BuildDeltaText(EstimatedMargin, previousSummary.EstimatedMargin);
             UnitsSoldDeltaText = BuildDeltaText(UnitsSold, previousSummary.UnitsSold);
             SalesCountDeltaText = BuildDeltaText(SalesCount, previousSummary.SalesCount);
 
             var history = await _dashboard.GetSalesHistoryAsync(fromUtc, toUtc);
             SalesHistory.Clear();
-            foreach (var it in history) SalesHistory.Add(it);
+            foreach (var item in history)
+                SalesHistory.Add(item);
 
             var dailySales = await _dashboard.GetDailySalesAsync(fromUtc, toUtc);
             DailySales.Clear();
-            foreach (var it in dailySales) DailySales.Add(it);
+            foreach (var item in dailySales)
+                DailySales.Add(item);
+            OnPropertyChanged(nameof(DailySales));
+
             MaxDailyRevenue = DailySales.Count == 0 ? 1 : DailySales.Max(x => x.Revenue);
             HasDailySales = DailySales.Count > 0;
+            AverageDailyRevenueText = DailySales.Count == 0
+                ? "Promedio diario: $0"
+                : $"Promedio diario: {DailySales.Average(x => x.Revenue):C}";
+            BestDayText = DailySales.Count == 0
+                ? "Sin mejor dia todavia"
+                : BuildBestDayText(DailySales
+                    .OrderByDescending(x => x.Revenue)
+                    .ThenByDescending(x => x.Units)
+                    .First());
 
             if (SelectedPeriod == DashboardPeriod.Range)
             {
@@ -146,17 +176,27 @@ public partial class DashboardViewModel : ObservableObject
                 );
             }
 
-
-
             TopByUnits.Clear();
             TopByRevenue.Clear();
+            TopByMargin.Clear();
+
             var topByUnits = await _dashboard.GetTopByUnitsAsync(fromUtc, toUtc);
-            foreach (var it in topByUnits) TopByUnits.Add(it);
+            foreach (var item in topByUnits)
+                TopByUnits.Add(item);
             HasTopByUnits = TopByUnits.Count > 0;
+            MaxTopUnits = HasTopByUnits ? TopByUnits.Max(x => x.Units) : 1;
 
             var topByRevenue = await _dashboard.GetTopByRevenueAsync(fromUtc, toUtc);
-            foreach (var it in topByRevenue) TopByRevenue.Add(it);
+            foreach (var item in topByRevenue)
+                TopByRevenue.Add(item);
             HasTopByRevenue = TopByRevenue.Count > 0;
+            MaxTopRevenue = HasTopByRevenue ? TopByRevenue.Max(x => x.Revenue) : 1;
+
+            var topByMargin = await _dashboard.GetTopByMarginAsync(fromUtc, toUtc);
+            foreach (var item in topByMargin)
+                TopByMargin.Add(item);
+            HasTopByMargin = TopByMargin.Count > 0;
+            MaxTopMargin = HasTopByMargin ? TopByMargin.Max(x => x.Margin) : 1;
         }
         catch (Exception ex)
         {
@@ -168,39 +208,19 @@ public partial class DashboardViewModel : ObservableObject
         }
     }
 
-
     private (DateTime fromUtc, DateTime toUtc) GetCustomRangeUtc()
     {
         if (FromDate is null || ToDate is null)
-            throw new ArgumentException("Seleccioná Desde y Hasta.");
+            throw new ArgumentException("Selecciona Desde y Hasta.");
 
         var fromLocalDate = FromDate.Value.Date;
         var toLocalDate = ToDate.Value.Date;
 
         if (toLocalDate < fromLocalDate)
-            throw new ArgumentException("La fecha 'Hasta' no puede ser menor que 'Desde'.");
+            throw new ArgumentException("La fecha Hasta no puede ser menor que Desde.");
 
-        // día completo de 'Hasta' => [Desde 00:00, Hasta+1 00:00)
-        var toLocalExclusiveDate = toLocalDate.AddDays(1);
-
-        // Argentina timezone (Windows)
-        var tz = TimeZoneInfo.FindSystemTimeZoneById("Argentina Standard Time");
-
-        //  a UTC usando DateTimeOffset (evita el problema Kind=Unspecified)
-        var fromOffset = new DateTimeOffset(
-            fromLocalDate,
-            tz.GetUtcOffset(fromLocalDate)
-        );
-
-        var toOffset = new DateTimeOffset(
-            toLocalExclusiveDate,
-            tz.GetUtcOffset(toLocalExclusiveDate)
-        );
-
-        return (fromOffset.UtcDateTime, toOffset.UtcDateTime);
+        return BusinessTime.GetUtcRangeForBusinessDates(fromLocalDate, toLocalDate);
     }
-
-
 
     partial void OnSelectedPeriodChanged(DashboardPeriod value)
     {
@@ -208,22 +228,22 @@ public partial class DashboardViewModel : ObservableObject
             _ = LoadAsync();
     }
 
+    partial void OnIsFiltersExpandedChanged(bool value)
+        => OnPropertyChanged(nameof(FiltersToggleLabel));
+
     private static (DateTime fromUtc, DateTime toUtc) GetRangeUtc(DashboardPeriod period)
     {
-        // Argentina timezone
-        var tz = TimeZoneInfo.FindSystemTimeZoneById("Argentina Standard Time");
-
-        var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tz);
+        var nowLocal = BusinessTime.GetBusinessNow();
 
         DateTime startLocal = period switch
         {
             DashboardPeriod.Today => nowLocal.Date,
-            DashboardPeriod.Week => nowLocal.Date.AddDays(-(int)nowLocal.DayOfWeek), // Semana desde domingo
+            DashboardPeriod.Week => nowLocal.Date.AddDays(-(int)nowLocal.DayOfWeek),
             DashboardPeriod.Month => new DateTime(nowLocal.Year, nowLocal.Month, 1),
             _ => nowLocal.Date
         };
 
-        var endLocal = period switch
+        DateTime endLocal = period switch
         {
             DashboardPeriod.Today => startLocal.AddDays(1),
             DashboardPeriod.Week => startLocal.AddDays(7),
@@ -231,9 +251,7 @@ public partial class DashboardViewModel : ObservableObject
             _ => startLocal.AddDays(1)
         };
 
-        var fromUtc = TimeZoneInfo.ConvertTimeToUtc(startLocal, tz);
-        var toUtc = TimeZoneInfo.ConvertTimeToUtc(endLocal, tz);
-        return (fromUtc, toUtc);
+        return BusinessTime.GetUtcRangeForBusinessDates(startLocal, endLocal.AddDays(-1));
     }
 
     private static (DateTime fromUtc, DateTime toUtc) GetPreviousRangeUtc(DateTime fromUtc, DateTime toUtc)
@@ -251,12 +269,25 @@ public partial class DashboardViewModel : ObservableObject
     private static string BuildDeltaText(double current, double previous)
     {
         if (Math.Abs(previous) < 0.0001)
-            return current == 0 ? "Sin cambios" : "Nuevo período";
+            return current == 0 ? "Sin cambios" : "Nuevo periodo";
 
         var delta = current - previous;
         var percent = delta / previous;
-        var arrow = percent >= 0 ? "▲" : "▼";
-        return $"{arrow} {Math.Abs(percent):P0} vs período anterior";
+        var trend = percent >= 0 ? "Sube" : "Baja";
+        return $"{trend} {Math.Abs(percent):P0} vs periodo anterior";
     }
-}
 
+    private static string BuildRangeLabel(DateTime fromUtc, DateTime toUtc)
+    {
+        var fromLocal = BusinessTime.ConvertUtcToBusinessLocal(fromUtc);
+        var toLocal = BusinessTime.ConvertUtcToBusinessLocal(toUtc.AddTicks(-1));
+
+        if (fromLocal.Date == toLocal.Date)
+            return $"{fromLocal:dddd dd MMM}";
+
+        return $"{fromLocal:dd MMM} - {toLocal:dd MMM}";
+    }
+
+    private static string BuildBestDayText(DashboardDailySalesDto day)
+        => $"Mejor dia: {day.Date:dd/MM} con {day.Revenue:C}";
+}

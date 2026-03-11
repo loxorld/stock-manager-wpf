@@ -20,23 +20,23 @@ public partial class BulkPriceUpdateWindow : Window
         Close();
     }
 
-    private async void Save_Click(object sender, RoutedEventArgs e)
+    private async void ApplyByType_Click(object sender, RoutedEventArgs e)
+        => await ExecuteAsync(Vm.ApplyByTypeAsync, "No se pudo actualizar los precios por tipo");
+
+    private async void ApplyGlobalPercentage_Click(object sender, RoutedEventArgs e)
+        => await ExecuteAsync(Vm.ApplyGlobalPercentageAsync, "No se pudo aplicar el porcentaje global");
+
+    private async Task ExecuteAsync(Func<Task> action, string errorTitle)
     {
         try
         {
-            await Vm.ApplyAsync();
+            await action();
 
             if (!string.IsNullOrWhiteSpace(Vm.ErrorMessage))
             {
-                UiError.Show(new InvalidOperationException(Vm.ErrorMessage), "No se pudo actualizar el precio");
+                UiError.Show(new InvalidOperationException(Vm.ErrorMessage), errorTitle);
                 return;
             }
-
-            MessageBox.Show(
-                $"Se actualizaron {Vm.UpdatedCount} ítems.",
-                "Precios actualizados",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
 
             DialogResult = true;
             Close();

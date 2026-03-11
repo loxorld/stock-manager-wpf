@@ -16,5 +16,6 @@ public interface ISkuQueryService
     );
 
     Task<SkuDetailDto?> GetByIdAsync(int id);
+    Task<List<SkuListItemDto>> GetCriticalStockAsync(int threshold, int take = 6);
 }
 

@@ -1,50 +1,50 @@
 # StockManager
-Aplicación de escritorio WPF para gestionar inventario (SKU) para los locales Planeta Celular y Planeta Movil, movimientos de stock y métricas de ventas. Incluye un dashboard con ventas por período y ranking de productos, y persiste datos localmente con SQLite.
 
-✨ Funcionalidades principales
-Gestión de SKU: alta/edición/baja de ítems con categoría, costo, precio, stock y estado activo.
+Aplicacion de escritorio WPF para gestionar inventario, movimientos de stock y metricas de ventas para los locales Planeta Celular y Planeta Movil. La aplicacion persiste los datos localmente con SQLite.
 
-Filtros y búsqueda: por categoría, estado, stock bajo y búsqueda por nombre.
+## Funcionalidades principales
 
-Movimientos de stock: compras, ventas, ajustes y mermas, con notas y métodos de pago.
+- Gestion de SKU: alta, edicion, baja, estado activo, costo, precio y stock.
+- Filtros y busqueda: por categoria, estado, stock bajo y texto libre.
+- Movimientos de stock: compras, ventas, ajustes y mermas, con nota y medio de pago.
+- Acciones rapidas: compra y venta rapida desde el detalle del item.
+- Dashboard de ventas: ingresos, ventas por dia, top por unidades e ingresos y comparativas con el periodo anterior.
+- Historial de movimientos por SKU.
 
-Acciones rápidas: compra/venta rápida (+1/-1) desde el detalle.
+## Stack tecnologico
 
-Dashboard de ventas: ingresos, ventas por día, top por unidades/ingresos y comparativas con período anterior.
+- WPF + MaterialDesignInXaml
+- MVVM con CommunityToolkit.Mvvm
+- EF Core + SQLite
+- .NET 10.0 para Windows
 
-Historial de movimientos por SKU.
+## Estructura del proyecto
 
-🧱 Stack tecnológico
-WPF + MaterialDesignInXaml
+- `StockManager/`: UI WPF (Views, ViewModels y Converters)
+- `StockManager.Application/`: DTOs e interfaces de servicios
+- `StockManager.Domain/`: entidades y enums de dominio
+- `StockManager.Infrastructure/`: EF Core, SQLite, servicios y migraciones
 
-MVVM con CommunityToolkit.Mvvm
+## Base de datos
 
-EF Core + SQLite
+La base de datos se guarda localmente en:
 
-.NET 10.0 (Windows)
+`%LOCALAPPDATA%\StockManager\stock.db`
 
-🗂️ Estructura del proyecto
-StockManager.slnx
-├─ StockManager/                 # UI WPF (Views, ViewModels, Converters)
-├─ StockManager.Application/     # DTOs e interfaces de servicios
-├─ StockManager.Domain/          # Entidades y enums de dominio
-└─ StockManager.Infrastructure/  # EF Core, SQLite, servicios y migraciones
-🗄️ Base de datos
-La aplicación guarda los datos localmente en:
+La ruta esta centralizada en `StockManager.Infrastructure.Persistence.DbPaths`.
 
-%LOCALAPPDATA%\StockManager\stock.db
-El acceso a la base está centralizado en StockManager.Infrastructure.Persistence.DbPaths.
+## Compilar y ejecutar
 
-▶️ Cómo compilar y ejecutar
 Requiere Windows y .NET 10 instalado.
 
+```powershell
 dotnet restore
 dotnet build StockManager.slnx
 dotnet run --project StockManager/StockManager.csproj
-🧭 Notas de dominio
-Categorías: Case, ScreenProtector, Accessory.
+```
 
-Tipos de movimiento: PurchaseEntry, Sale, Adjustment, Shrinkage.
+## Notas de dominio
 
-El dashboard usa zona horaria Argentina Standard Time para rangos diarios.
-
+- Categorias: `Case`, `ScreenProtector`, `Accessory`
+- Tipos de movimiento: `PurchaseEntry`, `Sale`, `Adjustment`, `Shrinkage`
+- El dashboard usa la zona horaria `Argentina Standard Time` para los rangos diarios
